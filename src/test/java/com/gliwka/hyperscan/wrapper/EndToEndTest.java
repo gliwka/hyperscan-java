@@ -80,4 +80,43 @@ class EndToEndTest {
             //expected
         }
     }
+
+    @Test
+    void readmeExample() {
+        //we define a list containing all of our expressions
+        LinkedList<Expression> expressions = new LinkedList<Expression>();
+
+        //the first argument in the constructor is the regular pattern, the latter one is a expression flag
+        //make sure you read the original hyperscan documentation to learn more about flags
+        //or browse the ExpressionFlag.java in this repo.
+        expressions.add(new Expression("[0-9]{5}", EnumSet.of(ExpressionFlag.SOM_LEFTMOST)));
+        expressions.add(new Expression("Test", EnumSet.of(ExpressionFlag.CASELESS)));
+
+
+        //we precompile the expression into a database.
+        //you can compile single expression instances or lists of expressions
+        try {
+            Database db = Database.Compile(expressions);
+
+            //initialize scanner
+            Scanner scanner = new Scanner();
+
+            //provide the database and the input string
+            //returns a list with matches
+            //synchronized method, only one execution at a time (use more scanner instances for multithreading)
+            List<Match> matches = scanner.Scan(db, "12345 test string");
+
+            //matches always contain the expression causing the match and the end position of the match
+            //the start position and the matches string it self is only part of a matach if the
+            //SOM_LEFTMOST is set (for more details refer to the original hyperscan documentation)
+        }
+        catch (CompileErrorException ce) {
+            //gets thrown during  compile in case something with the expression is wrong
+            //you can retrieve the expression causing the exception like this:
+            Expression failedExpression = ce.getFailedExpression();
+        }
+        catch(Throwable e) {
+            //edge cases like OOM, illegal platform etc.
+        }
+    }
 }
