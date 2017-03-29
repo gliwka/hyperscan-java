@@ -16,13 +16,18 @@ Make sure you specify the system property ```jna.library.path``` using code or t
 
 Hyperscan only supports a subset of regular expressions. Notable exceptions are for example backreferences and capture groups. Please read the [hyperscan developer reference](https://01org.github.io/hyperscan/dev-reference/) so you get a good unterstanding how hyperscan works and what the limitations are.
 
-## Included Packages
+## Included packages
 ```com.gliwka.hyperscan.wrapper``` provides a java-style wrapper arround hyperscan.
 ```com.gliwka.hyperscan.jna``` implements the JNA interface and primitives used to call the hyperscan c library.
 
 If you just want to use hyperscan in java, you only need to import ```com.gliwka.hyperscan.wrapper```.
 
-## Simple Example
+## Add it to your project
+Visit https://jitpack.io/#gliwka/hyperscan-java to add it to your project. Select the desired version and click on *Get it*. Then choose your build tool and follow the instructions. Gradle, maven, sbt and leiningen are supported.
+
+Thanks to jitpack.io for hosting this project. 
+
+## Simple example
 ```java
 import com.gliwka.hyperscan.wrapper;
 
