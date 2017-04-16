@@ -6,7 +6,7 @@
 
     <groupId>com.gliwka.hyperscan</groupId>
     <artifactId>hyperscan</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/net.java.dev.jna/jna -->
         <dependency>
