@@ -74,7 +74,7 @@ public class Scanner {
             }
         };
 
-        hsError = HyperscanLibrary.INSTANCE.hs_scan(dbPointer, input, input.length(),
+        hsError = HyperscanLibrary.INSTANCE.hs_scan(dbPointer, input, input.getBytes().length,
                 0, scratch.getValue(), matchHandler, Pointer.NULL);
 
         if(hsError != 0)

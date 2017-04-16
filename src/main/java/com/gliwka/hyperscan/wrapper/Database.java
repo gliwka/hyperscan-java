@@ -51,9 +51,9 @@ public class Database {
         PointerByReference database = new PointerByReference();
         PointerByReference error = new PointerByReference();
 
+
         int hsError = HyperscanLibrary.INSTANCE.hs_compile(expression.getExpression(),
                 Util.bitEnumSetToInt(expression.getFlags()), HS_MODE_BLOCK, Pointer.NULL, database, error);
-
 
         ArrayList<Expression> expressions = new ArrayList<Expression>(1);
         expressions.add(expression);

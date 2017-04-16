@@ -109,14 +109,27 @@ class EndToEndTest {
             //matches always contain the expression causing the match and the end position of the match
             //the start position and the matches string it self is only part of a matach if the
             //SOM_LEFTMOST is set (for more details refer to the original hyperscan documentation)
-        }
-        catch (CompileErrorException ce) {
+        } catch (CompileErrorException ce) {
             //gets thrown during  compile in case something with the expression is wrong
             //you can retrieve the expression causing the exception like this:
             Expression failedExpression = ce.getFailedExpression();
+        } catch (Throwable e) {
+            //edge cases like OOM, illegal platform etc.
+        }
+    }
+
+
+    @Test void chineseUTF8() {
+        Expression expr = new Expression("测试", EnumSet.of(ExpressionFlag.UTF8));
+        try {
+            Database db = Database.Compile(expr);
+            Scanner scanner = new Scanner();
+            List<Match> matches = scanner.Scan(db, "这是一个测试");
+
+            assertEquals(matches.size(), 1);
         }
         catch(Throwable e) {
-            //edge cases like OOM, illegal platform etc.
+            fail(e);
         }
     }
 }
