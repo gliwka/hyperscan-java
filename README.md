@@ -23,7 +23,7 @@ Hyperscan only supports a subset of regular expressions. Notable exceptions are 
 If you just want to use hyperscan in java, you only need to import ```com.gliwka.hyperscan.wrapper```.
 
 ## Add it to your project
-Visit https://jitpack.io/#gliwka/hyperscan-java to add it to your project. Select the desired version and click on *Get it*. Then choose your build tool and follow the instructions. Gradle, maven, sbt and leiningen are supported.
+Visit https://jitpack.io/#cerebuild/hyperscan-java to add it to your project. Select the desired version and click on *Get it*. Then choose your build tool and follow the instructions. Gradle, maven, sbt and leiningen are supported.
 
 Thanks to jitpack.io for hosting this project. 
 
