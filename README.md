@@ -10,6 +10,17 @@ Hyperscan uses hybrid automata techniques to allow simultaneous matching of larg
 (see https://github.com/01org/hyperscan)
 
 ## Prerequisites
+
+### Processor architecture
+Hyperscan will only run on x86 processors in 64-bit and 32-bit modes and takes advantage of special instruction sets, when available. Check the original [project documentation](https://01org.github.io/hyperscan/dev-reference/getting_started.html#hardware) to learn more.
+
+### Compiled shared library
+This java wrapper relies on a compiled hyperscan shared library binary for its execution
+
+#### Modern 64-bit Linux distribution
+This wrapper already contains a precompiled 64-bit shared library, which should work on most modern Linux distributions.
+
+#### Compile yourself
 Make sure you've got hyperscan compiled as a shared library on your system. On Linux a ```mkdir build && cd build && cmake -DBUILD_SHARED_LIBS=YES ..``` inside the git repositiory was enough. For more information about how to compile hyperscan visit the [project documentation](https://01org.github.io/hyperscan/dev-reference/).
 
 Make sure you specify the system property ```jna.library.path``` using code or the command line to point to a location which includes the hyperscan shared libraries.
