@@ -4,6 +4,7 @@ import com.sun.jna.*;
 import com.gliwka.hyperscan.jna.*;
 import com.sun.jna.ptr.PointerByReference;
 
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -60,13 +61,17 @@ public class Scanner {
 
         final LinkedList<Match> matches = new LinkedList<Match>();
 
+        final byte[] inputBytes = input.getBytes(StandardCharsets.UTF_8);
+
         HyperscanLibrary.match_event_handler matchHandler = new HyperscanLibrary.match_event_handler() {
             public int invoke(int id, long from, long to, int flags, Pointer context) {
                 String match = "";
                 Expression matchingExpression = db.getExpression(id);
 
                 if(matchingExpression.getFlags().contains(ExpressionFlag.SOM_LEFTMOST)) {
-                    match = input.substring((int)from, (int)to);
+                    byte[] matchBytes = new byte[(int)to-(int)from];
+                    System.arraycopy(inputBytes, (int)from, matchBytes, 0, (int)to - (int)from);
+                    match = new String(matchBytes, StandardCharsets.UTF_8);
                 }
 
                 matches.add(new Match(from, to, match, matchingExpression));
