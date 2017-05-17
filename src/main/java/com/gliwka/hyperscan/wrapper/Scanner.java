@@ -61,7 +61,7 @@ public class Scanner {
 
         final LinkedList<Match> matches = new LinkedList<Match>();
 
-        final byte[] inputBytes = input.getBytes(StandardCharsets.UTF_8);
+        final int[] byteToIndex = Util.utf8ByteIndexesMapping(input);
 
         HyperscanLibrary.match_event_handler matchHandler = new HyperscanLibrary.match_event_handler() {
             public int invoke(int id, long from, long to, int flags, Pointer context) {
@@ -69,12 +69,12 @@ public class Scanner {
                 Expression matchingExpression = db.getExpression(id);
 
                 if(matchingExpression.getFlags().contains(ExpressionFlag.SOM_LEFTMOST)) {
-                    byte[] matchBytes = new byte[(int)to-(int)from];
-                    System.arraycopy(inputBytes, (int)from, matchBytes, 0, (int)to - (int)from);
-                    match = new String(matchBytes, StandardCharsets.UTF_8);
+                    int startIndex = byteToIndex[(int)from];
+                    int endIndex = byteToIndex[(int)to];
+                    match = input.substring(startIndex, endIndex);
                 }
 
-                matches.add(new Match(from, to, match, matchingExpression));
+                matches.add(new Match(byteToIndex[(int)from], byteToIndex[(int)to], match, matchingExpression));
                 return 0;
             }
         };
