@@ -58,7 +58,7 @@ expressions.add(new Expression("Test", EnumSet.of(ExpressionFlag.CASELESS)));
 //we precompile the expression into a database.
 //you can compile single expression instances or lists of expressions
 try {
-    Database db = Database.Compile(expressions);
+    Database db = Database.compile(expressions);
 
     //initialize scanner
     Scanner scanner = new Scanner();
@@ -66,7 +66,7 @@ try {
     //provide the database and the input string
     //returns a list with matches
     //synchronized method, only one execution at a time (use more scanner instances for multithreading)
-    List<Match> matches = scanner.Scan(db, "12345 test string");
+    List<Match> matches = scanner.scan(db, "12345 test string");
 
     //matches always contain the expression causing the match and the end position of the match
     //the start position and the matches string it self is only part of a matach if the
