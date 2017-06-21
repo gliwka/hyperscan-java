@@ -42,7 +42,7 @@ public enum ExpressionFlag implements BitFlag {
     UCP(64),
 
     /**
-     * Compile pattern in prefiltering mode.
+     * compile pattern in prefiltering mode.
      */
     PREFILTER(128),
 

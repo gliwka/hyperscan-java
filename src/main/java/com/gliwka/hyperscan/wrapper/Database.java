@@ -23,7 +23,7 @@ public class Database {
         this.expressions = expressions;
     }
 
-    private static void HandleErrors(int hsError, Pointer compileError, List<Expression> expressions) throws Throwable {
+    private static void handleErrors(int hsError, Pointer compileError, List<Expression> expressions) throws Throwable {
         if(hsError == 0)
             return;
 
@@ -42,12 +42,12 @@ public class Database {
     }
 
     /**
-     * Compile an expression into a database to use for scanning
+     * compile an expression into a database to use for scanning
      * @param expression Expression to compile
      * @return Compiled database
      * @throws Throwable CompileErrorException on errors concerning the pattern, otherwise different Throwable's
      */
-    public static Database Compile(Expression expression) throws Throwable {
+    public static Database compile(Expression expression) throws Throwable {
         PointerByReference database = new PointerByReference();
         PointerByReference error = new PointerByReference();
 
@@ -58,7 +58,7 @@ public class Database {
         ArrayList<Expression> expressions = new ArrayList<Expression>(1);
         expressions.add(expression);
 
-        HandleErrors(hsError, error.getValue(), expressions);
+        handleErrors(hsError, error.getValue(), expressions);
 
         return new Database(database.getValue(), expressions);
     }
@@ -69,7 +69,7 @@ public class Database {
      * @return Compiled database
      * @throws Throwable CompileErrorException on errors concerning the pattern, otherwise different Throwable's
      */
-    public static Database Compile(List<Expression> expressions) throws Throwable {
+    public static Database compile(List<Expression> expressions) throws Throwable {
         final int expressionsSize = expressions.size();
 
         String[] expressionsStr = new String[expressionsSize];
@@ -88,7 +88,7 @@ public class Database {
         int hsError = HyperscanLibrary.INSTANCE.hs_compile_multi(expressionsStr, flags, ids, expressionsSize,
                 HS_MODE_BLOCK, Pointer.NULL, database, error);
 
-        HandleErrors(hsError, error.getValue(), expressions);
+        handleErrors(hsError, error.getValue(), expressions);
 
         return new Database(database.getValue(), expressions);
     }

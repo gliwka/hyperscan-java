@@ -4,7 +4,6 @@ import com.sun.jna.*;
 import com.gliwka.hyperscan.jna.*;
 import com.sun.jna.ptr.PointerByReference;
 
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -44,14 +43,14 @@ public class Scanner {
     }
 
     /**
-     * Scan for a match in a string using a compiled expression database
+     * scan for a match in a string using a compiled expression database
      * Can only be executed one at a time on a per instance basis
      * @param db Database containing expressions to use for matching
      * @param input String to match against
      * @return List of Matches
      * @throws Throwable Throws if out of memory or platform not supported
      */
-    public synchronized List<Match> Scan(final Database db, final String input) throws Throwable {
+    public synchronized List<Match> scan(final Database db, final String input) throws Throwable {
         Pointer dbPointer = db.getPointer();
 
         int hsError = HyperscanLibrary.INSTANCE.hs_alloc_scratch(dbPointer, scratch);
