@@ -2,6 +2,7 @@ package com.gliwka.hyperscan.wrapper;
 
 import java.security.InvalidParameterException;
 import java.util.EnumSet;
+import java.util.Arrays;
 
 class Util {
     static int bitEnumSetToInt(EnumSet enumSet) {
@@ -20,19 +21,28 @@ class Util {
 
     static int[] utf8ByteIndexesMapping(String s) {
         int[] byteIndexes = new int[s.getBytes().length];
-        int sum = 0;
-        for (int i = 0; i < s.length(); i++) {
-            byteIndexes[sum] = i;
-            int c = s.codePointAt(i);
-            if (Character.charCount(c) == 2) {
-                i++;
-            }
-            if (c <=     0x7F) sum += 1; else
-            if (c <=    0x7FF) sum += 2; else
-            if (c <=   0xFFFF) sum += 3; else
-            if (c <= 0x1FFFFF) sum += 4; else
+        int currentByte = 0;
+
+        for (int stringPosition = 0; stringPosition < s.length(); stringPosition++) {
+            int c = s.codePointAt(stringPosition);
+
+            int unicodeCharLength;
+
+            if (c <=     0x7F) unicodeCharLength = 1; else
+            if (c <=    0x7FF) unicodeCharLength = 2; else
+            if (c <=   0xFFFF) unicodeCharLength = 3; else
+            if (c <= 0x1FFFFF) unicodeCharLength = 4; else
                 throw new Error();
+
+            Arrays.fill(byteIndexes, currentByte, currentByte + unicodeCharLength, stringPosition);
+
+            currentByte += unicodeCharLength;
+
+            if (Character.charCount(c) == 2) {
+                stringPosition++;
+            }
         }
+
         return byteIndexes;
     }
 

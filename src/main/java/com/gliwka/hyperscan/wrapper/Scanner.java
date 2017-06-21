@@ -69,11 +69,11 @@ public class Scanner {
 
                 if(matchingExpression.getFlags().contains(ExpressionFlag.SOM_LEFTMOST)) {
                     int startIndex = byteToIndex[(int)from];
-                    int endIndex = byteToIndex[(int)to];
-                    match = input.substring(startIndex, endIndex);
+                    int endIndex = byteToIndex[(int)to - 1];
+                    match = input.substring(startIndex, endIndex + 1);
                 }
 
-                matches.add(new Match(byteToIndex[(int)from], byteToIndex[(int)to], match, matchingExpression));
+                matches.add(new Match(byteToIndex[(int)from], byteToIndex[(int)to - 1], match, matchingExpression));
                 return 0;
             }
         };

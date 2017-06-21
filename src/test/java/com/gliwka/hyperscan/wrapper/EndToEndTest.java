@@ -23,7 +23,7 @@ class EndToEndTest {
             Scanner scanner = new Scanner();
             List<Match> matches = scanner.scan(db, "Dies ist ein Test tst.");
             assertEquals(matches.size(), 2);
-            assertEquals(matches.get(0).getEndPosition(), 17);
+            assertEquals(matches.get(0).getEndPosition(), 16);
             assertEquals(matches.get(0).getStartPosition(), 13);
             assertEquals(matches.get(0).getMatchedString(), "Test");
             assertEquals(matches.get(0).getMatchedExpression(), expression);
@@ -61,7 +61,7 @@ class EndToEndTest {
             Scanner scanner = new Scanner();
             List<Match> matches = scanner.scan(db, "Dies ist ein Test tst.");
             assertEquals(matches.size(), 3);
-            assertEquals(matches.get(0).getEndPosition(), 8);
+            assertEquals(matches.get(0).getEndPosition(), 7);
             assertEquals(matches.get(0).getStartPosition(), 5);
             assertEquals(matches.get(0).getMatchedString(), "ist");
             assertEquals(matches.get(0).getMatchedExpression(), expressions.get(1));
