@@ -12,7 +12,8 @@ import java.util.List;
  * In case of multithreaded scanning, you need one scanner instance per thread.
  */
 public class Scanner {
-    private PointerByReference scratch = new PointerByReference();
+    private PointerByReference scratchReference = new PointerByReference();
+    private Pointer scratch;
 
 
     /**
@@ -38,7 +39,7 @@ public class Scanner {
      */
     public long getSize() {
         SizeTByReference size = new SizeTByReference();
-        HyperscanLibrary.INSTANCE.hs_scratch_size(scratch.getValue(), size);
+        HyperscanLibrary.INSTANCE.hs_scratch_size(scratch, size);
         return size.getValue().longValue();
     }
 
@@ -53,10 +54,12 @@ public class Scanner {
     public synchronized List<Match> scan(final Database db, final String input) throws Throwable {
         Pointer dbPointer = db.getPointer();
 
-        int hsError = HyperscanLibrary.INSTANCE.hs_alloc_scratch(dbPointer, scratch);
+        int hsError = HyperscanLibrary.INSTANCE.hs_alloc_scratch(dbPointer, scratchReference);
 
         if(hsError != 0)
             throw new OutOfMemoryError("Not enough memory to allocate scratch space");
+
+        scratch = scratchReference.getValue();
 
         final LinkedList<Match> matches = new LinkedList<Match>();
 
@@ -79,7 +82,7 @@ public class Scanner {
         };
 
         hsError = HyperscanLibrary.INSTANCE.hs_scan(dbPointer, input, input.getBytes().length,
-                0, scratch.getValue(), matchHandler, Pointer.NULL);
+                0, scratch, matchHandler, Pointer.NULL);
 
         if(hsError != 0)
             throw Util.hsErrorIntToException(hsError);
@@ -89,6 +92,6 @@ public class Scanner {
 
     @Override
     protected void finalize() {
-        HyperscanLibrary.INSTANCE.hs_free_scratch(scratch.getValue());
+        HyperscanLibrary.INSTANCE.hs_free_scratch(scratch);
     }
 }
