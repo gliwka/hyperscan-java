@@ -44,6 +44,22 @@ public class Scanner {
     }
 
     /**
+     * Allocate a scratch space.  Must be called at least once with each
+     * database that will be used before scan is called.
+     * @param db Database containing expressions to use for matching
+     * @throws Throwable Throws if out of memory or platform not supported
+     * or if the allocation fails
+     */
+    public synchronized void allocScratch(final Database db) throws Throwable {
+        Pointer dbPointer = db.getPointer();
+
+        int hsError = HyperscanLibrary.INSTANCE.hs_alloc_scratch(dbPointer, scratchReference);
+
+        if(hsError != 0)
+            throw new OutOfMemoryError("Not enough memory to allocate scratch space");
+    }
+
+    /**
      * scan for a match in a string using a compiled expression database
      * Can only be executed one at a time on a per instance basis
      * @param db Database containing expressions to use for matching
@@ -53,11 +69,6 @@ public class Scanner {
      */
     public synchronized List<Match> scan(final Database db, final String input) throws Throwable {
         Pointer dbPointer = db.getPointer();
-
-        int hsError = HyperscanLibrary.INSTANCE.hs_alloc_scratch(dbPointer, scratchReference);
-
-        if(hsError != 0)
-            throw new OutOfMemoryError("Not enough memory to allocate scratch space");
 
         scratch = scratchReference.getValue();
 
@@ -81,7 +92,7 @@ public class Scanner {
             }
         };
 
-        hsError = HyperscanLibrary.INSTANCE.hs_scan(dbPointer, input, input.getBytes().length,
+        int hsError = HyperscanLibrary.INSTANCE.hs_scan(dbPointer, input, input.getBytes().length,
                 0, scratch, matchHandler, Pointer.NULL);
 
         if(hsError != 0)
