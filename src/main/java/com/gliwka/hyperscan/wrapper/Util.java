@@ -48,7 +48,7 @@ class Util {
 
     static Throwable hsErrorIntToException(int hsError) {
         switch (hsError) {
-            case -1: return new InvalidParameterException();
+            case -1: return new InvalidParameterException("An invalid parameter has been passed. Is scratch allocated?");
             case -2: return new OutOfMemoryError("Hyperscan was unable to allocate memory");
             case -11: return new UnsupportedOperationException("Unsupported CPU architecture. At least SSE3 is needed");
             default: return new Exception("Unexpected exception");
