@@ -62,6 +62,10 @@ try {
 
     //initialize scanner
     Scanner scanner = new Scanner();
+
+    //allocate scratch space matching the passed database
+    scanner.allocScratch(db);
+
     
     //provide the database and the input string
     //returns a list with matches
