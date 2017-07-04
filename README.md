@@ -39,6 +39,10 @@ Visit https://jitpack.io/#cerebuild/hyperscan-java to add it to your project. Se
 Thanks to jitpack.io for hosting this project. 
 
 For the JAR file only head to the [releases](https://github.com/cerebuild/hyperscan-java/releases).
+## Javadoc
+
+The javadoc is located at https://cerebuild.github.io/hyperscan-java/
+
 ## Simple example
 ```java
 import com.gliwka.hyperscan.wrapper;
