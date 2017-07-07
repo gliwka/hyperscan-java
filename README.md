@@ -17,11 +17,11 @@ Hyperscan will only run on x86 processors in 64-bit and 32-bit modes and takes a
 ### Compiled shared library
 This java wrapper relies on a compiled hyperscan shared library binary for its execution
 
-#### Modern 64-bit Linux distribution
-This wrapper already contains a precompiled 64-bit shared library, which should work on most modern Linux distributions.
+#### Modern 64-bit Linux distribution or 64-bit MacOS
+This wrapper already contains precompiled 64-bit shared libraries, which should work on most modern Linux distributions or recent MacOS.
 
 #### Compile yourself
-Make sure you've got hyperscan compiled as a shared library on your system. On Linux a ```mkdir build && cd build && cmake -DBUILD_SHARED_LIBS=YES ..``` inside the git repositiory was enough. For more information about how to compile hyperscan visit the [project documentation](https://01org.github.io/hyperscan/dev-reference/).
+Make sure you've got hyperscan compiled as a shared library on your system. On Linux a ```mkdir build && cd build && cmake -DBUILD_SHARED_LIBS=YES ..``` inside the git repositiory was enough. On MacOS use ```mkdir build && cd build && cmake -G Xcode -DBUILD_SHARED_LIBS=YES ..```, then open the build directory in Xcode and build the project.  For more information about how to compile hyperscan visit the [project documentation](https://01org.github.io/hyperscan/dev-reference/).
 
 Make sure you specify the system property ```jna.library.path``` using code or the command line to point to a location which includes the hyperscan shared libraries.
 
