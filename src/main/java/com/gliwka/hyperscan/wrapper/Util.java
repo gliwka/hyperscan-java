@@ -19,8 +19,8 @@ class Util {
         return bitValue;
     }
 
-    static int[] utf8ByteIndexesMapping(String s) {
-        int[] byteIndexes = new int[s.getBytes().length];
+    static int[] utf8ByteIndexesMapping(String s, int bytesLength) {
+        int[] byteIndexes = new int[bytesLength];
         int currentByte = 0;
 
         for (int stringPosition = 0; stringPosition < s.length(); stringPosition++) {
