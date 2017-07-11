@@ -1,11 +1,16 @@
 package com.gliwka.hyperscan.jna;
 
+import java.util.Map;
+import java.util.HashMap;
 import com.sun.jna.*;
 import com.sun.jna.ptr.PointerByReference;
 
 
 public interface HyperscanLibrary extends Library{
-    HyperscanLibrary INSTANCE = (HyperscanLibrary) Native.loadLibrary("hs", HyperscanLibrary.class);
+    Map opts = new HashMap() { {
+        put(OPTION_STRING_ENCODING, "UTF-8");
+    }};
+    HyperscanLibrary INSTANCE = (HyperscanLibrary) Native.loadLibrary("hs", HyperscanLibrary.class, opts);
 
     String hs_version();
 

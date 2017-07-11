@@ -4,6 +4,7 @@ import com.sun.jna.*;
 import com.gliwka.hyperscan.jna.*;
 import com.sun.jna.ptr.PointerByReference;
 
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -74,7 +75,9 @@ public class Scanner {
 
         final LinkedList<Match> matches = new LinkedList<Match>();
 
-        final int[] byteToIndex = Util.utf8ByteIndexesMapping(input);
+        final byte[] utf8bytes =input.getBytes(StandardCharsets.UTF_8);
+        int bytesLength = utf8bytes.length;
+        final int[] byteToIndex = Util.utf8ByteIndexesMapping(input, bytesLength);
 
         HyperscanLibrary.match_event_handler matchHandler = new HyperscanLibrary.match_event_handler() {
             public int invoke(int id, long from, long to, int flags, Pointer context) {
@@ -92,7 +95,7 @@ public class Scanner {
             }
         };
 
-        int hsError = HyperscanLibrary.INSTANCE.hs_scan(dbPointer, input, input.getBytes().length,
+        int hsError = HyperscanLibrary.INSTANCE.hs_scan(dbPointer, input, bytesLength,
                 0, scratch, matchHandler, Pointer.NULL);
 
         if(hsError != 0)
