@@ -6,7 +6,7 @@
 
     <groupId>com.gliwka.hyperscan</groupId>
     <artifactId>hyperscan</artifactId>
-    <version>0.4.2</version>
+    <version>0.4.3</version>
     <build>
         <plugins>
             <plugin>
