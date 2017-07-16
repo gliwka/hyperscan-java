@@ -60,6 +60,16 @@ public class Scanner {
             throw new OutOfMemoryError("Not enough memory to allocate scratch space");
     }
 
+    private LinkedList<long[]> matchedIds = new LinkedList<>();
+
+    private HyperscanLibrary.match_event_handler matchHandler = new HyperscanLibrary.match_event_handler() {
+        public int invoke(int id, long from, long to, int flags, Pointer context) {
+            long[] tuple = { id, from, to };
+            matchedIds.add(tuple);
+            return 0;
+        }
+    };
+
     /**
      * scan for a match in a string using a compiled expression database
      * Can only be executed one at a time on a per instance basis
@@ -79,27 +89,29 @@ public class Scanner {
         int bytesLength = utf8bytes.length;
         final int[] byteToIndex = Util.utf8ByteIndexesMapping(input, bytesLength);
 
-        HyperscanLibrary.match_event_handler matchHandler = new HyperscanLibrary.match_event_handler() {
-            public int invoke(int id, long from, long to, int flags, Pointer context) {
-                String match = "";
-                Expression matchingExpression = db.getExpression(id);
-
-                if(matchingExpression.getFlags().contains(ExpressionFlag.SOM_LEFTMOST)) {
-                    int startIndex = byteToIndex[(int)from];
-                    int endIndex = byteToIndex[(int)to - 1];
-                    match = input.substring(startIndex, endIndex + 1);
-                }
-
-                matches.add(new Match(byteToIndex[(int)from], byteToIndex[(int)to - 1], match, matchingExpression));
-                return 0;
-            }
-        };
-
+        matchedIds.clear();
         int hsError = HyperscanLibrary.INSTANCE.hs_scan(dbPointer, input, bytesLength,
                 0, scratch, matchHandler, Pointer.NULL);
 
         if(hsError != 0)
             throw Util.hsErrorIntToException(hsError);
+
+
+        matchedIds.forEach( tuple -> {
+            int id = (int)tuple[0];
+            long from = tuple[1];
+            long to = tuple[2];
+            String match = "";
+            Expression matchingExpression = db.getExpression(id);
+
+            if(matchingExpression.getFlags().contains(ExpressionFlag.SOM_LEFTMOST)) {
+                int startIndex = byteToIndex[(int)from];
+                int endIndex = byteToIndex[(int)to - 1];
+                match = input.substring(startIndex, endIndex + 1);
+            }
+
+            matches.add(new Match(byteToIndex[(int)from], byteToIndex[(int)to - 1], match, matchingExpression));
+        });
 
         return matches;
     }
