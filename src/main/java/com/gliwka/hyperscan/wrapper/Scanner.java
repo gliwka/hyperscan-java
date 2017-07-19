@@ -51,7 +51,7 @@ public class Scanner {
      * @throws Throwable Throws if out of memory or platform not supported
      * or if the allocation fails
      */
-    public synchronized void allocScratch(final Database db) throws Throwable {
+    public void allocScratch(final Database db) throws Throwable {
         Pointer dbPointer = db.getPointer();
 
         int hsError = HyperscanLibrary.INSTANCE.hs_alloc_scratch(dbPointer, scratchReference);
@@ -78,7 +78,7 @@ public class Scanner {
      * @return List of Matches
      * @throws Throwable Throws if out of memory or platform not supported
      */
-    public synchronized List<Match> scan(final Database db, final String input) throws Throwable {
+    public List<Match> scan(final Database db, final String input) throws Throwable {
         Pointer dbPointer = db.getPointer();
 
         scratch = scratchReference.getValue();
