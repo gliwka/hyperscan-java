@@ -90,7 +90,7 @@ public class Scanner {
         final int[] byteToIndex = Util.utf8ByteIndexesMapping(input, bytesLength);
 
         matchedIds.clear();
-        int hsError = HyperscanLibrary.INSTANCE.hs_scan(dbPointer, input, bytesLength,
+        int hsError = HyperscanLibraryDirect.hs_scan(dbPointer, input, bytesLength,
                 0, scratch, matchHandler, Pointer.NULL);
 
         if(hsError != 0)
