@@ -6,10 +6,11 @@ import com.sun.jna.*;
 import com.sun.jna.ptr.PointerByReference;
 
 
-public interface HyperscanLibrary extends Library{
+public interface HyperscanLibrary extends Library {
     Map opts = new HashMap() { {
         put(OPTION_STRING_ENCODING, "UTF-8");
     }};
+
     HyperscanLibrary INSTANCE = (HyperscanLibrary) Native.loadLibrary("hs", HyperscanLibrary.class, opts);
 
     String hs_version();
