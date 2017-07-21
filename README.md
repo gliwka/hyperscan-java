@@ -1,4 +1,6 @@
 # hyperscan-java
+[![Build Status](https://travis-ci.org/cerebuild/hyperscan-java.svg?branch=master)](https://travis-ci.org/cerebuild/hyperscan-java)
+
 This project is a third-party developed JNA based java wrapper for the [hyperscan](https://github.com/01org/hyperscan) project.
 
 The original project is developed by the the Intel Open Source Technology Center and describes it self as follows:
