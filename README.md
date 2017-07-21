@@ -1,5 +1,6 @@
 # hyperscan-java
-[![Build Status](https://travis-ci.org/cerebuild/hyperscan-java.svg?branch=master)](https://travis-ci.org/cerebuild/hyperscan-java)
+[![Build Status](https://travis-ci.org/cerebuild/hyperscan-java.svg?branch=master)](https://travis-ci.org/cerebuild/hyperscan-java) [![](https://jitpack.io/v/cerebuild/hyperscan-java.svg)](https://jitpack.io/#cerebuild/hyperscan-java)
+
 
 This project is a third-party developed JNA based java wrapper for the [hyperscan](https://github.com/01org/hyperscan) project.
 
