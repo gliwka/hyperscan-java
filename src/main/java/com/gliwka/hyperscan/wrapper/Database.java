@@ -6,13 +6,15 @@ import com.gliwka.hyperscan.jna.SizeTByReference;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Database containing compiled expressions ready for scanning using the Scanner
  */
-public class Database {
+public class Database implements Closeable {
     private static final int HS_MODE_BLOCK = 1;
     private static final int HS_COMPILE_ERROR = -4;
     private Pointer database;
@@ -115,5 +117,10 @@ public class Database {
 
     Expression getExpression(int id) {
         return expressions.get(id);
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.finalize();
     }
 }

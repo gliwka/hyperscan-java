@@ -3,6 +3,7 @@ package com.gliwka.hyperscan.wrapper;
 import com.sun.jna.*;
 import com.gliwka.hyperscan.jna.*;
 import com.sun.jna.ptr.PointerByReference;
+import java.io.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
@@ -12,7 +13,7 @@ import java.util.List;
  * Scanner, can be used with databases to scan for expressions in input string
  * In case of multithreaded scanning, you need one scanner instance per thread.
  */
-public class Scanner {
+public class Scanner implements Closeable {
     private PointerByReference scratchReference = new PointerByReference();
     private Pointer scratch;
 
@@ -119,5 +120,10 @@ public class Scanner {
     @Override
     protected void finalize() {
         HyperscanLibrary.INSTANCE.hs_free_scratch(scratch);
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.finalize();
     }
 }
