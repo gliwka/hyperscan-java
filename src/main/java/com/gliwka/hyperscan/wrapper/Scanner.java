@@ -86,8 +86,8 @@ public class Scanner implements Closeable {
     public List<Match> scan(final Database db, final String input) throws Throwable {
         Pointer dbPointer = db.getPointer();
 
-        final byte[] utf8bytes =input.getBytes(StandardCharsets.UTF_8);
-        int bytesLength = utf8bytes.length;
+        final byte[] utf8bytes = input.getBytes(StandardCharsets.UTF_8);
+        final int bytesLength = utf8bytes.length;
 
         matchedIds.clear();
         int hsError = HyperscanLibraryDirect.hs_scan(dbPointer, input, bytesLength,
@@ -95,7 +95,6 @@ public class Scanner implements Closeable {
 
         if(hsError != 0)
             throw Util.hsErrorIntToException(hsError);
-
 
         if(matchedIds.isEmpty())
             return noMatches;
