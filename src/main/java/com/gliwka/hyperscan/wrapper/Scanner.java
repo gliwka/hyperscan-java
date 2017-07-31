@@ -88,7 +88,6 @@ public class Scanner implements Closeable {
 
         final byte[] utf8bytes =input.getBytes(StandardCharsets.UTF_8);
         int bytesLength = utf8bytes.length;
-        final int[] byteToIndex = Util.utf8ByteIndexesMapping(input, bytesLength);
 
         matchedIds.clear();
         int hsError = HyperscanLibraryDirect.hs_scan(dbPointer, input, bytesLength,
@@ -101,6 +100,7 @@ public class Scanner implements Closeable {
         if(matchedIds.isEmpty())
             return noMatches;
 
+        final int[] byteToIndex = Util.utf8ByteIndexesMapping(input, bytesLength);
         final LinkedList<Match> matches = new LinkedList<Match>();
         matchedIds.forEach( tuple -> {
             int id = (int)tuple[0];
