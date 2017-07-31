@@ -6,6 +6,7 @@ import com.sun.jna.ptr.PointerByReference;
 import java.io.*;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -64,6 +65,7 @@ public class Scanner implements Closeable {
     }
 
     private LinkedList<long[]> matchedIds = new LinkedList<>();
+    private List<Match> noMatches = Collections.emptyList();
 
     private HyperscanLibrary.match_event_handler matchHandler = new HyperscanLibrary.match_event_handler() {
         public int invoke(int id, long from, long to, int flags, Pointer context) {
@@ -84,8 +86,6 @@ public class Scanner implements Closeable {
     public List<Match> scan(final Database db, final String input) throws Throwable {
         Pointer dbPointer = db.getPointer();
 
-        final LinkedList<Match> matches = new LinkedList<Match>();
-
         final byte[] utf8bytes =input.getBytes(StandardCharsets.UTF_8);
         int bytesLength = utf8bytes.length;
         final int[] byteToIndex = Util.utf8ByteIndexesMapping(input, bytesLength);
@@ -98,6 +98,10 @@ public class Scanner implements Closeable {
             throw Util.hsErrorIntToException(hsError);
 
 
+        if(matchedIds.isEmpty())
+            return noMatches;
+
+        final LinkedList<Match> matches = new LinkedList<Match>();
         matchedIds.forEach( tuple -> {
             int id = (int)tuple[0];
             long from = tuple[1];
