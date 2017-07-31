@@ -59,6 +59,8 @@ public class Scanner implements Closeable {
 
         if(hsError != 0)
             throw new OutOfMemoryError("Not enough memory to allocate scratch space");
+
+        scratch = scratchReference.getValue();
     }
 
     private LinkedList<long[]> matchedIds = new LinkedList<>();
@@ -81,8 +83,6 @@ public class Scanner implements Closeable {
      */
     public List<Match> scan(final Database db, final String input) throws Throwable {
         Pointer dbPointer = db.getPointer();
-
-        scratch = scratchReference.getValue();
 
         final LinkedList<Match> matches = new LinkedList<Match>();
 
