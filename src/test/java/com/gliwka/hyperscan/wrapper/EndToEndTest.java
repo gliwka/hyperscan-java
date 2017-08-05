@@ -84,6 +84,19 @@ class EndToEndTest {
     }
 
     @Test
+    void infiniteRegex() {
+        try {
+            Database db = Database.compile(new Expression("a|", EnumSet.of(ExpressionFlag.ALLOWEMPTY)));
+            Scanner scanner = new Scanner();
+            scanner.allocScratch(db);
+            List<Match> matches = scanner.scan(db, "12345 test string");
+        }
+        catch(Throwable t) {
+            fail(t);
+        }
+    }
+
+    @Test
     void readmeExample() {
         //we define a list containing all of our expressions
         LinkedList<Expression> expressions = new LinkedList<Expression>();
