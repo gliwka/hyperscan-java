@@ -104,7 +104,8 @@ public class Scanner implements Closeable {
         matchedIds.forEach( tuple -> {
             int id = (int)tuple[0];
             long from = tuple[1];
-            long to = tuple[2];
+            long to = tuple[2] < 1 ? 1 : tuple[2]; //prevent index out of bound exception later
+            System.out.println(to);
             String match = "";
             Expression matchingExpression = db.getExpression(id);
 
