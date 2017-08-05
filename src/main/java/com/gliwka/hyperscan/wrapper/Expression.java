@@ -60,6 +60,16 @@ public class Expression {
     }
 
     /**
+     * Constructor for a new expression without flags
+     * @param expression Expression to use for matching
+     */
+    public Expression(String expression)
+    {
+        this.expression = expression;
+        this.flags = EnumSet.noneOf(ExpressionFlag.class);
+    }
+
+    /**
      * Validates if the expression instance is valid
      * @return ValidationResult object
      */
