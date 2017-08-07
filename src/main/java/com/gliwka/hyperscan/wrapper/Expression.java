@@ -15,6 +15,15 @@ import java.util.EnumSet;
 public class Expression {
     private EnumSet<ExpressionFlag> flags;
     private String expression;
+    private Object context = null;
+
+    /**
+     * Get the context object associated with the Expression
+     * @return
+     */
+    public Object getContext() {
+        return context;
+    }
 
 
     /**
@@ -47,6 +56,28 @@ public class Expression {
         }
     }
 
+    /**
+     * Constructor for a new expression without flags
+     * @param expression Expression to use for matching
+     */
+    public Expression(String expression)
+    {
+        this.expression = expression;
+        this.flags = EnumSet.noneOf(ExpressionFlag.class);
+    }
+
+    /**
+     * Constructor for a new expression without flags
+     * @param expression Expression to use for matching
+     * @param context Context object associated with expression
+     */
+    public Expression(String expression, Object context)
+    {
+        this.expression = expression;
+        this.flags = EnumSet.noneOf(ExpressionFlag.class);
+        this.context = context;
+    }
+
 
     /**
      * Constructor for a new expression
@@ -60,13 +91,16 @@ public class Expression {
     }
 
     /**
-     * Constructor for a new expression without flags
+     * Constructor for a new expression
      * @param expression Expression to use for matching
+     * @param flags Flags influencing the behaviour of the scanner
+     * @param context Context object associated with the expression
      */
-    public Expression(String expression)
+    public Expression(String expression, EnumSet<ExpressionFlag> flags, Object context)
     {
         this.expression = expression;
-        this.flags = EnumSet.noneOf(ExpressionFlag.class);
+        this.flags = flags;
+        this.context = context;
     }
 
     /**
