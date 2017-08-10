@@ -93,6 +93,17 @@ public class Expression {
     /**
      * Constructor for a new expression
      * @param expression Expression to use for matching
+     * @param flag Single ExpressionFlag influencing the behaviour of the scanner
+     */
+    public Expression(String expression, ExpressionFlag flag)
+    {
+        this.expression = expression;
+        this.flags = EnumSet.of(flag);
+    }
+
+    /**
+     * Constructor for a new expression
+     * @param expression Expression to use for matching
      * @param flags Flags influencing the behaviour of the scanner
      * @param context Context object associated with the expression
      */
@@ -104,9 +115,25 @@ public class Expression {
     }
 
     /**
+     * Constructor for a new expression
+     * @param expression Expression to use for matching
+     * @param flag Single ExpressionFlag influencing the behaviour of the scanner
+     * @param context Context object associated with the expression
+     */
+    public Expression(String expression, ExpressionFlag flag, Object context)
+    {
+        this.expression = expression;
+        this.flags = EnumSet.of(flag);
+        this.context = context;
+    }
+    
+
+    /**
      * Validates if the expression instance is valid
      * @return ValidationResult object
      */
+
+
     public ValidationResult validate() {
         PointerByReference info = new PointerByReference();
         PointerByReference error = new PointerByReference();
