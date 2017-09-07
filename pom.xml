@@ -28,7 +28,7 @@
 					<dependency>
 						<groupId>org.junit.platform</groupId>
 						<artifactId>junit-platform-surefire-provider</artifactId>
-						<version>1.0.0-M4</version>
+						<version>1.0.0-M6</version>
 					</dependency>
 				</dependencies>
 			</plugin>
