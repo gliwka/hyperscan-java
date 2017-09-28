@@ -1,4 +1,33 @@
-language: java
-cache:
-  directories:
-  - $HOME/.m2
+jobs:
+  include:
+    - stage: Compile hyperscan shared library if neccesary
+      if: type NOT IN (pull_request, api, cron)
+      language: bash
+      script: travis-build/deploy-hyperscan.sh
+      os: linux
+      env: TARGET_OS=linux TARGET_ARCH=x86
+      sudo: required
+      services:
+        - docker
+    - stage: Compile hyperscan shared library if neccesary
+      if: type NOT IN (pull_request, api, cron)
+      language: bash
+      script: travis-build/deploy-hyperscan.sh
+      os: linux
+      env: TARGET_OS=linux TARGET_ARCH=x86_64
+      sudo: required
+      services:
+        - docker
+    - stage: Compile hyperscan shared library if neccesary
+      if: type NOT IN (pull_request, api, cron)
+      language: bash
+      script: travis-build/deploy-hyperscan.sh
+      os: osx
+      osx_image: xcode9	
+      env: TARGET_OS=darwin TARGET_ARCH=x86_64
+    - stage: Test java bindings
+      os: linux
+      language: java
+      cache:
+        directories:
+          - $HOME/.m2
