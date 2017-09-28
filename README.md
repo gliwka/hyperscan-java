@@ -15,11 +15,11 @@ hyperscan only supports a subset of regular expressions. Notable exceptions are 
 hyperscan will only run on x86 processors in 64-bit and 32-bit modes and takes advantage of special instruction sets, when available. Check the original [project documentation](https://01org.github.io/hyperscan/dev-reference/getting_started.html#hardware) to learn more.
 
 ## Dependencies
-This wrapper only relies on the hyperscan shared library for it's functionality. It already contains precompiled 64-bit shared libraries, which should work on glibc based Linux distributions or recent MacOS.
+This wrapper only relies on the hyperscan shared library for it's functionality. It already contains precompiled 64-bit shared libraries for macOS and both 32-bit and 64-bit libraries for most glibc based Linux distributions.
 
 #### Compile yourself
 In case the precompiled binaries don't suite your usecase, you got to 
-make sure you've got hyperscan compiled as a shared library on your system. On Linux a ```mkdir build && cd build && cmake -DBUILD_SHARED_LIBS=YES ..``` inside the git repositiory was enough. On MacOS use ```mkdir build && cd build && cmake -G Xcode -DBUILD_SHARED_LIBS=YES ..```, then open the build directory in Xcode and build the project.  For more information about how to compile hyperscan visit the [project documentation](https://01org.github.io/hyperscan/dev-reference/).
+make sure you've got hyperscan compiled as a shared library on your system. On Linux and macOS a ```mkdir build && cd build && cmake -DBUILD_SHARED_LIBS=YES .. && make``` inside the git repositiory was enough. For more information about how to compile hyperscan visit the [project documentation](https://01org.github.io/hyperscan/dev-reference/).
 
 Make sure you specify the system property ```jna.library.path``` using code or the command line to point to a location which includes the hyperscan shared libraries.
 
