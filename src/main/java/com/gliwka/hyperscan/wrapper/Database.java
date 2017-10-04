@@ -35,6 +35,7 @@ public class Database implements Closeable {
                 throw new CompileErrorException(errorStruct.message, expressions.get(errorStruct.expression));
             }
             finally {
+                errorStruct.setAutoRead(false);
                 HyperscanLibrary.INSTANCE.hs_free_compile_error(errorStruct);
             }
         }
