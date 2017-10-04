@@ -147,6 +147,7 @@ public class Expression {
             isValid = false;
             CompileErrorStruct errorStruct = new CompileErrorStruct(error.getValue());
             errorMessage = errorStruct.message;
+            errorStruct.setAutoRead(false);
             HyperscanLibrary.INSTANCE.hs_free_compile_error(errorStruct);
         }
         else {
