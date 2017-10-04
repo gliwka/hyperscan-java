@@ -50,8 +50,17 @@ class Util {
         switch (hsError) {
             case -1: return new InvalidParameterException("An invalid parameter has been passed. Is scratch allocated?");
             case -2: return new OutOfMemoryError("Hyperscan was unable to allocate memory");
+            case -3: return new Exception("The engine was terminated by callback.");
+            case -4: return new Exception("The pattern compiler failed.");
+            case -5: return new Exception("The given database was built for a different version of Hyperscan.");
+            case -6: return new Exception("The given database was built for a different platform.");
+            case -7: return new Exception("The given database was built for a different mode of operation.");
+            case -8: return new Exception("A parameter passed to this function was not correctly aligned.");
+            case -9: return new Exception("The allocator did not return memory suitably aligned for the largest representable data type on this platform.");
+            case -10: return new Exception("The scratch region was already in use.");
             case -11: return new UnsupportedOperationException("Unsupported CPU architecture. At least SSE3 is needed");
-            default: return new Exception("Unexpected exception");
+            case -12: return new Exception("Provided buffer was too small.");
+            default: return new Exception("Unexpected error: " + hsError);
         }
     }
 }
