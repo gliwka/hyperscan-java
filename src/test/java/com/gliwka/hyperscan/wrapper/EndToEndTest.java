@@ -97,6 +97,21 @@ class EndToEndTest {
     }
 
     @Test
+    void throwOnNullExpression() {
+        try {
+            Database db = Database.compile(new Expression(null));
+        }
+        catch(NullPointerException n) {
+            //expected
+        }
+        catch(Throwable t) {
+            fail(t);
+        }
+
+        fail("Should never reach here");
+    }
+
+    @Test
     void readmeExample() {
         //we define a list containing all of our expressions
         LinkedList<Expression> expressions = new LinkedList<Expression>();

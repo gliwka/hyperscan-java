@@ -62,6 +62,8 @@ public class Expression {
      */
     public Expression(String expression)
     {
+        checkArguments(expression);
+
         this.expression = expression;
         this.flags = EnumSet.noneOf(ExpressionFlag.class);
     }
@@ -73,6 +75,8 @@ public class Expression {
      */
     public Expression(String expression, Object context)
     {
+        checkArguments(expression);
+
         this.expression = expression;
         this.flags = EnumSet.noneOf(ExpressionFlag.class);
         this.context = context;
@@ -86,6 +90,8 @@ public class Expression {
      */
     public Expression(String expression, EnumSet<ExpressionFlag> flags)
     {
+        checkArguments(expression);
+
         this.expression = expression;
         this.flags = flags;
     }
@@ -97,6 +103,8 @@ public class Expression {
      */
     public Expression(String expression, ExpressionFlag flag)
     {
+        checkArguments(expression);
+
         this.expression = expression;
         this.flags = EnumSet.of(flag);
     }
@@ -109,6 +117,8 @@ public class Expression {
      */
     public Expression(String expression, EnumSet<ExpressionFlag> flags, Object context)
     {
+        checkArguments(expression);
+
         this.expression = expression;
         this.flags = flags;
         this.context = context;
@@ -122,6 +132,8 @@ public class Expression {
      */
     public Expression(String expression, ExpressionFlag flag, Object context)
     {
+        checkArguments(expression);
+
         this.expression = expression;
         this.flags = EnumSet.of(flag);
         this.context = context;
@@ -172,5 +184,11 @@ public class Expression {
     public String getExpression()
     {
         return expression;
+    }
+
+    private static void checkArguments(String expression) {
+        if(expression == null) {
+            throw new NullPointerException("Null value for expression is not allowed");
+        }
     }
 }
