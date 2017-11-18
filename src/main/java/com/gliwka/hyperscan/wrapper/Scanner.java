@@ -81,7 +81,7 @@ public class Scanner implements Closeable {
      * @param db Database containing expressions to use for matching
      * @param input String to match against
      * @return List of Matches
-     * @throws Throwable Throws if out of memory or platform not supported
+     * @throws Throwable Throws if out of memory, platform not supported or database is null
      */
     public List<Match> scan(final Database db, final String input) throws Throwable {
         Pointer dbPointer = db.getPointer();
