@@ -97,9 +97,10 @@ class EndToEndTest {
     }
 
     @Test
-    void throwOnNullExpression() {
+    void doesIt() {
         try {
             Database db = Database.compile(new Expression(null));
+            fail("Should never reach here");
         }
         catch(NullPointerException n) {
             //expected
@@ -107,8 +108,6 @@ class EndToEndTest {
         catch(Throwable t) {
             fail(t);
         }
-
-        fail("Should never reach here");
     }
 
     @Test
