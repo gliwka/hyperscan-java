@@ -59,7 +59,7 @@ public class Scanner implements Closeable {
         int hsError = HyperscanLibrary.INSTANCE.hs_alloc_scratch(dbPointer, scratchReference);
 
         if(hsError != 0)
-            throw new OutOfMemoryError("Not enough memory to allocate scratch space");
+            throw Util.hsErrorIntToException(hsError);
 
         scratch = scratchReference.getValue();
     }
