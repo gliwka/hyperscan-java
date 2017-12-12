@@ -4,11 +4,9 @@
 set -eu
 set -o pipefail
 
-echo "Checking for hyperscan version change"
-# Get a list of all changes
-CHANGED_FILES=($(git diff --name-only $TRAVIS_COMMIT_RANGE))
-# Check if the specified hyperscan version has been changed
-if [ -n "$(grep '^.hyperscan-version' <<< "$CHANGED_FILES")" ] || [ -n "$(grep '#rebuild' <<< "$TRAVIS_COMMIT_MESSAGE")" ]  ; then
+echo "Checking rebuild command..."
+# Check if commit message contains #rebuild cimmand
+if [ -n "$(grep '#rebuild' <<< "$TRAVIS_COMMIT_MESSAGE")" ]  ; then
     HYPERSCAN_VERSION=$(<.hyperscan-version)
     echo "Version changed to $HYPERSCAN_VERSION. Compiling and deploying new shared libraries"
     echo "Cloning the hyperscan code"
@@ -33,5 +31,5 @@ if [ -n "$(grep '^.hyperscan-version' <<< "$CHANGED_FILES")" ] || [ -n "$(grep '
     git pull --rebase $SSH_REPO $TRAVIS_BRANCH
     git push $SSH_REPO $TRAVIS_BRANCH
 else
-    echo "No version change detected"
+    echo "No rebuild command detected"
 fi
