@@ -7,9 +7,9 @@ set -o pipefail
 echo "Checking for hyperscan version change"
 # Get a list of all changes
 CHANGED_FILES=($(git diff --name-only $TRAVIS_COMMIT_RANGE))
-
+LAST_COMMIT_MSG=($(git log -1 --pretty=%B))
 # Check if the specified hyperscan version has been changed
-if [ -n "$(grep '^.hyperscan-version' <<< "$CHANGED_FILES")" ]; then
+if [ -n "$(grep '^.hyperscan-version' <<< "$CHANGED_FILES")"] || [-n "$(grep '#rebuild' <<< "$LAST_COMMIT_MSG)"] ; then
     HYPERSCAN_VERSION=$(<.hyperscan-version)
     echo "Version changed to $HYPERSCAN_VERSION. Compiling and deploying new shared libraries"
     echo "Cloning the hyperscan code"
