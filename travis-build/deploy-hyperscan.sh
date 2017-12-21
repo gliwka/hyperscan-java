@@ -10,7 +10,7 @@ if [ -n "$(grep '#rebuild' <<< "$TRAVIS_COMMIT_MESSAGE")" ]  ; then
     HYPERSCAN_VERSION=$(<.hyperscan-version)
     echo "Version changed to $HYPERSCAN_VERSION. Compiling and deploying new shared libraries"
     echo "Cloning the hyperscan code"
-    git clone -b $HYPERSCAN_VERSION --depth 1 https://github.com/01org/hyperscan.git /tmp/hyperscan
+    git clone -b $HYPERSCAN_VERSION --depth 1 https://github.com/intel/hyperscan.git /tmp/hyperscan
     echo "Running build script for $TRAVIS_OS_NAME"
     bash travis-build/build-$TARGET_OS-$TARGET_ARCH.sh
     cd $TRAVIS_BUILD_DIR

@@ -1,25 +1,25 @@
 # hyperscan-java
 [![Build Status](https://travis-ci.org/cerebuild/hyperscan-java.svg?branch=master)](https://travis-ci.org/cerebuild/hyperscan-java) [![](https://jitpack.io/v/cerebuild/hyperscan-java.svg)](https://jitpack.io/#cerebuild/hyperscan-java)
 
-[hyperscan](https://github.com/01org/hyperscan) is a high-performance multiple regex matching library.
+[hyperscan](https://github.com/intel/hyperscan) is a high-performance multiple regex matching library.
 
 It uses hybrid automata techniques to allow simultaneous matching of large numbers (up to tens of thousands) of regular expressions and for the matching of regular expressions across streams of data.
 
 
-This project is a third-party developed JNA based java wrapper for the [hyperscan](https://github.com/01org/hyperscan) project to enable developers to integrate hyperscan in their java (JVM) based projects.
+This project is a third-party developed JNA based java wrapper for the [hyperscan](https://github.com/intel/hyperscan) project to enable developers to integrate hyperscan in their java (JVM) based projects.
 
 ## Limitations of hyperscan
 
-hyperscan only supports a subset of regular expressions. Notable exceptions are for example backreferences and capture groups. Please read the [hyperscan developer reference](https://01org.github.io/hyperscan/dev-reference/) so you get a good unterstanding how hyperscan works and what the limitations are.
+hyperscan only supports a subset of regular expressions. Notable exceptions are for example backreferences and capture groups. Please read the [hyperscan developer reference](https://intel.github.io/hyperscan/dev-reference/) so you get a good unterstanding how hyperscan works and what the limitations are.
 
-hyperscan will only run on x86 processors in 64-bit and 32-bit modes and takes advantage of special instruction sets, when available. Check the original [project documentation](https://01org.github.io/hyperscan/dev-reference/getting_started.html#hardware) to learn more.
+hyperscan will only run on x86 processors in 64-bit and 32-bit modes and takes advantage of special instruction sets, when available. Check the original [project documentation](https://intel.github.io/hyperscan/dev-reference/getting_started.html#hardware) to learn more.
 
 ## Dependencies
 This wrapper only relies on the hyperscan shared library for it's functionality. It already contains precompiled 64-bit shared libraries for macOS and both 32-bit and 64-bit libraries for most glibc based Linux distributions.
 
 #### Compile yourself
 In case the precompiled binaries don't suite your usecase, you got to 
-make sure you've got hyperscan compiled as a shared library on your system. On Linux and macOS a ```mkdir build && cd build && cmake -DBUILD_SHARED_LIBS=YES .. && make``` inside the git repositiory was enough. For more information about how to compile hyperscan visit the [project documentation](https://01org.github.io/hyperscan/dev-reference/).
+make sure you've got hyperscan compiled as a shared library on your system. On Linux and macOS a ```mkdir build && cd build && cmake -DBUILD_SHARED_LIBS=YES .. && make``` inside the git repositiory was enough. For more information about how to compile hyperscan visit the [project documentation](https://intel.github.io/hyperscan/dev-reference/).
 
 Make sure you specify the system property ```jna.library.path``` using code or the command line to point to a location which includes the hyperscan shared libraries.
 
@@ -92,7 +92,7 @@ If you just want to use hyperscan in java, you only need to import ```com.gliwka
 
 ## Currently not implemented
  * Serialization and Deserialization of databases
- * Extended expression syntax using [hs_compile_ext_multi()](http://01org.github.io/hyperscan/dev-reference/api_files.html#project0hs__compile_8h_1aacc508bea3042f1faba32c3818bfc2a3)
+ * Extended expression syntax using [hs_compile_ext_multi()](http://intel.github.io/hyperscan/dev-reference/api_files.html#project0hs__compile_8h_1aacc508bea3042f1faba32c3818bfc2a3)
 
  Feel free to submit a pull request.
 
