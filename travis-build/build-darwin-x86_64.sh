@@ -7,6 +7,9 @@ set -o pipefail
 echo Building on OS X
 cd /tmp/hyperscan
 
+echo Update homebrew
+brew update
+
 echo Installing dependencies
 brew install ragel
 
