@@ -10,6 +10,8 @@ This project is a third-party developed JNA based java wrapper for the [hypersca
 
 ## Limitations of hyperscan
 
+It currently works on OS X and Linux, only!
+
 hyperscan only supports a subset of regular expressions. Notable exceptions are for example backreferences and capture groups. Please read the [hyperscan developer reference](https://intel.github.io/hyperscan/dev-reference/) so you get a good unterstanding how hyperscan works and what the limitations are.
 
 hyperscan will only run on x86 processors in 64-bit and 32-bit modes and takes advantage of special instruction sets, when available. Check the original [project documentation](https://intel.github.io/hyperscan/dev-reference/getting_started.html#hardware) to learn more.
