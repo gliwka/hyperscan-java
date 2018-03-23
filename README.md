@@ -1,5 +1,5 @@
 # hyperscan-java
-[![Build Status](https://travis-ci.org/cerebuild/hyperscan-java.svg?branch=master)](https://travis-ci.org/cerebuild/hyperscan-java) [![](https://jitpack.io/v/cerebuild/hyperscan-java.svg)](https://jitpack.io/#cerebuild/hyperscan-java)
+[![Build Status](https://travis-ci.org/LocateTech/hyperscan-java.svg?branch=master)](https://travis-ci.org/LocateTech/hyperscan-java) [![](https://jitpack.io/v/LocateTech/hyperscan-java.svg)](https://jitpack.io/#LocateTech/hyperscan-java)
 
 [hyperscan](https://github.com/intel/hyperscan) is a high-performance multiple regex matching library.
 
@@ -24,11 +24,11 @@ make sure you've got hyperscan compiled as a shared library on your system. On L
 Make sure you specify the system property ```jna.library.path``` using code or the command line to point to a location which includes the hyperscan shared libraries.
 
 ## Add it to your project
-Visit https://jitpack.io/#cerebuild/hyperscan-java to add it to your project. Select the desired version and click on *Get it*. Then choose your build tool and follow the instructions. Gradle, maven, sbt and leiningen are supported.
+Visit https://jitpack.io/#LocateTech/hyperscan-java to add it to your project. Select the desired version and click on *Get it*. Then choose your build tool and follow the instructions. Gradle, maven, sbt and leiningen are supported.
 
 Thanks to jitpack.io for hosting this project. 
 
-For the JAR file only head to the [releases](https://github.com/cerebuild/hyperscan-java/releases) page.
+For the JAR file only head to the [releases](https://github.com/LocateTech/hyperscan-java/releases) page.
 
 ## Simple example
 ```java
@@ -79,7 +79,7 @@ catch(Throwable e) {
 
 ## Javadoc
 
-The javadoc is located [here](https://cerebuild.github.io/hyperscan-java/).
+The javadoc is located [here](https://LocateTech.github.io/hyperscan-java/).
 
 
 
