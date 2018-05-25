@@ -4,11 +4,10 @@
 set -eu
 set -o pipefail
 
-echo Installing wget, gcc, g++, tar
-yum -y install wget gcc gcc-c++ tar
+THREADS=$(nproc --all)
 
-echo Adding repo with gcc 4.8.2 and related build tools
-wget https://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
+echo Installing wget, gcc, g++, tar, make
+yum -y install wget gcc gcc-c++ tar, make
 
 echo Compiling and installing ragel
 cd /tmp
@@ -16,7 +15,7 @@ wget https://www.colm.net/files/ragel/ragel-6.10.tar.gz
 tar -zxf ragel-6.10.tar.gz
 cd ragel-6.10
 ./configure
-make
+make -j $THREADS
 make install
 
 echo Fetching boost headers
@@ -28,17 +27,19 @@ echo Linking boost headers
 ln -s /tmp/boost_1_65_1/boost /tmp/hyperscan/include/boost
 
 echo Installing tools
-yum -y install devtoolset-2-gcc-c++ cmake devtoolset-2-binutils
+yum -y install centos-release-scl
+yum-config-manager --enable rhel-server-rhscl-7-rpms
+yum -y install devtoolset-7-gcc-c++ devtoolset-7-gcc cmake
 
 echo Enabling devtoolset
 set +u
-source /opt/rh/devtoolset-2/enable
+source /opt/rh/devtoolset-7/enable
 set -u
 
 cd /tmp/hyperscan
 echo Kicking off hyperscan cmake build
-mkdir build && cd build && cmake -DBUILD_SHARED_LIBS=YES ..
-make
+mkdir build && cd build && cmake -DBUILD_AVX512=on -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_SHARED_LIBS=YES ..
+make -j $THREADS
 
 echo Removing debug symbols
 strip lib/libhs.so
