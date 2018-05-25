@@ -8,19 +8,19 @@ It uses hybrid automata techniques to allow simultaneous matching of large numbe
 
 This project is a third-party developed JNA based java wrapper for the [hyperscan](https://github.com/intel/hyperscan) project to enable developers to integrate hyperscan in their java (JVM) based projects.
 
-## Limitations of hyperscan
+## Limitations of hyperscan-java
 
-It currently works on OS X and Linux, only!
+It currently works on OS X and Linux, only! We currently only ship precompiled binaries for 64-bit (x86_64).
 
 hyperscan only supports a subset of regular expressions. Notable exceptions are for example backreferences and capture groups. Please read the [hyperscan developer reference](https://intel.github.io/hyperscan/dev-reference/) so you get a good unterstanding how hyperscan works and what the limitations are.
 
 hyperscan will only run on x86 processors in 64-bit and 32-bit modes and takes advantage of special instruction sets, when available. Check the original [project documentation](https://intel.github.io/hyperscan/dev-reference/getting_started.html#hardware) to learn more.
 
 ## Dependencies
-This wrapper only relies on the hyperscan shared library for it's functionality. It already contains precompiled 64-bit shared libraries for macOS and both 32-bit and 64-bit libraries for most glibc based Linux distributions.
+This wrapper only relies on the hyperscan shared library for it's functionality. It already contains precompiled 64-bit shared libraries for macOS and 64-bit libraries for most glibc (>=2.17) based Linux distributions.
 
 #### Compile yourself
-In case the precompiled binaries don't suite your usecase, you got to 
+In case the precompiled binaries don't suite your usecase or architecture, you got to 
 make sure you've got hyperscan compiled as a shared library on your system. On Linux and macOS a ```mkdir build && cd build && cmake -DBUILD_SHARED_LIBS=YES .. && make``` inside the git repositiory was enough. For more information about how to compile hyperscan visit the [project documentation](https://intel.github.io/hyperscan/dev-reference/).
 
 Make sure you specify the system property ```jna.library.path``` using code or the command line to point to a location which includes the hyperscan shared libraries.
