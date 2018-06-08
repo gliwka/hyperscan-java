@@ -1,7 +1,7 @@
 jobs:
   include:
     - stage: Compile hyperscan shared library if neccesary
-      if: type NOT IN (pull_request, api, cron)
+      if: type NOT IN (pull_request, api, cron) AND branch = develop
       language: bash
       script: travis-build/deploy-hyperscan.sh
       os: linux
@@ -10,7 +10,7 @@ jobs:
       services:
         - docker
     - stage: Compile hyperscan shared library if neccesary
-      if: type NOT IN (pull_request, api, cron)
+      if: type NOT IN (pull_request, api, cron) AND branch = develop
       language: bash
       script: travis-build/deploy-hyperscan.sh
       os: osx
