@@ -16,12 +16,14 @@ jobs:
     os: osx
     osx_image: xcode9
     env: TARGET_OS=darwin TARGET_ARCH=x86_64
-  - stage: Test java bindings
+  - stage: Test java bindings and create coverage report
     os: linux
     language: java
     cache:
       directories:
       - "$HOME/.m2"
+    after_success:
+        - bash <(curl -s https://codecov.io/bash)
   - stage: Deploy to maven central
     if: tag =~ ^v
     language: bash
