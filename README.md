@@ -1,5 +1,5 @@
 # hyperscan-java
-[![Build Status](https://travis-ci.org/LocateTech/hyperscan-java.svg?branch=master)](https://travis-ci.org/LocateTech/hyperscan-java) [![](https://jitpack.io/v/LocateTech/hyperscan-java.svg)](https://jitpack.io/#LocateTech/hyperscan-java)
+[![Build Status](https://travis-ci.org/LocateTech/hyperscan-java.svg?branch=master)](https://travis-ci.org/LocateTech/hyperscan-java) [![](https://jitpack.io/v/LocateTech/hyperscan-java.svg)](https://jitpack.io/#LocateTech/hyperscan-java) [![codecov](https://codecov.io/gh/LocateTech/hyperscan-java/branch/develop/graph/badge.svg)](https://codecov.io/gh/LocateTech/hyperscan-java)
 
 [hyperscan](https://github.com/intel/hyperscan) is a high-performance multiple regex matching library.
 
