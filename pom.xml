@@ -4,6 +4,9 @@
     <groupId>com.gliwka.hyperscan</groupId>
     <artifactId>hyperscan</artifactId>
     <version>0.5.0</version>
+    <name>hyperscan-java</name>
+    <description>Java bindings for the high-performance multiple regular expression library hyperscan</description>
+    <url>https://github.com/LocateTech/hyperscan-java</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

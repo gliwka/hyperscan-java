@@ -23,7 +23,7 @@ jobs:
       directories:
       - "$HOME/.m2"
   - stage: Deploy to maven central
-    if: branch = master AND tag IS present
+    if: tag =~ ^v
     language: bash
     script: travis-build/deploy-maven-central.sh
     os: linux
