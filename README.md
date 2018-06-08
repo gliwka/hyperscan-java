@@ -26,11 +26,27 @@ make sure you've got hyperscan compiled as a shared library on your system. On L
 Make sure you specify the system property ```jna.library.path``` using code or the command line to point to a location which includes the hyperscan shared libraries.
 
 ## Add it to your project
-Visit https://jitpack.io/#LocateTech/hyperscan-java to add it to your project. Select the desired version and click on *Get it*. Then choose your build tool and follow the instructions. Gradle, maven, sbt and leiningen are supported.
+This project is available on maven central.
 
-Thanks to jitpack.io for hosting this project. 
+#### Maven
+```xml
+<dependency>
+    <groupId>com.gliwka.hyperscan</groupId>
+    <artifactId>hyperscan</artifactId>
+    <version>0.5.0</version>
+</dependency
+```
 
-For the JAR file only head to the [releases](https://github.com/LocateTech/hyperscan-java/releases) page.
+#### Gradle
+
+```gradle
+compile group: 'com.gliwka.hyperscan', name: 'hyperscan', version: '0.5.0'
+```
+
+#### sbt
+```sbt
+libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "0.5.0"
+```
 
 ## Simple example
 ```java
