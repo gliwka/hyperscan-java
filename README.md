@@ -96,7 +96,17 @@ If you just want to use hyperscan in java, you only need to import ```com.gliwka
  * Serialization and Deserialization of databases
  * Extended expression syntax using [hs_compile_ext_multi()](http://intel.github.io/hyperscan/dev-reference/api_files.html#project0hs__compile_8h_1aacc508bea3042f1faba32c3818bfc2a3)
 
- Feel free to submit a pull request.
 
- ## License
- [BSD 3-Clause License](LICENSE)
+## Contributing
+ Feel free to raise issues or submit a pull request.
+
+
+## Version control
+ This project follows the [git flow](https://github.com/kashike/flow-nbt/blob/master/README.md) branching model.
+ All development happens on feature branches. ```develop``` is the integration branch. The ```master``` branch only contains production-ready code. All releases are tagged.
+
+## Credits
+Shoutout to [@eliaslevy](https://github.com/eliaslevy) for all the great contributions and to the hyperscan team for this great library!
+
+## License
+[BSD 3-Clause License](LICENSE)
