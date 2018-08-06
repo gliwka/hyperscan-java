@@ -28,6 +28,7 @@ This project is available on maven central.
 compile group: 'com.gliwka.hyperscan', name: 'hyperscan', version: '0.5.0'
 ```
 
+
 #### sbt
 ```sbt
 libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "0.5.0"
