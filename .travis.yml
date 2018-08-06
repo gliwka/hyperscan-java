@@ -9,7 +9,7 @@ jobs:
       directories:
       - "$HOME/.m2"
       - "$HOME/.sonar/cache"
-    script: mvn sonar:sonar -Dsonar.organization=locatetech -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONARCLOUD_TOKEN
+    script: git fetch --unshallow && mvn sonar:sonar -Dsonar.organization=locatetech -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONARCLOUD_TOKEN
   - stage: Compile hyperscan shared library if neccesary
     if: type NOT IN (pull_request, api, cron) AND branch = develop
     language: bash
