@@ -1,5 +1,14 @@
 jobs:
   include:
+  - stage: Analyze code quality using sonarqube
+    os: linux
+    language: java
+    env:
+    - secure: rx32mBGrS125APMI5nSXV5TngbDKRoowgiXJzvDXKn9PuCF8MGJOyf981j4XGV1fPC60JwQ2OMCL55zDr7p9sGAqsXeeswX2dTy9xQ6Mvd23wOS6XmK5D9wmCKNwHtZQl9oK9vmxdDLixU04oWzaBT/qNDD96oX2WKTbs4/ASQoH3iolUaZIdyKEfE98AHhwUQ2CzSb9WWpPWRvPcUR4k52XLmOfIwEQ+RgMYbtBqX7Hz/65sl+wVIlmLpUVsEZvFNE7KkJ54iiGcPAHzxywbmCUPcYX+9YBPAREAXXMia3nDTME7RwwGHaiN9tArzQuAyAgUYO8GvQTC/PbHSc31nrg+fvWt0ja2JC2cYOYUXB2GBd4Izkvjk6/8ZQmzQ8X/jWBHsvyncYHZwvunFMscc+UonzabzRzZXfebMrjuLauPZEnul8OTLIrz4u3TA7ShiCYlu/Y7EPbQjIOGxlRJzndNvaD/byWVX/U235Rz8r2IzQZ/LWv7KbwIXQv18t3BXG2jbeM7m6wIL10NXbb4ZDzqtezzwJ1H1/h1X2hmdwpTC5HTwUAu3HaSsUc1gIarDz971QLCH8uQdrcIFYZb1hNlS84M92eavNb5mTd580145O68X1S7xQNGkg1UtaMLdl2REesekpIXjZ6FyH1rk0EhYyCxeHYVUwkm/BjxW4=
+    cache:
+      directories:
+      - "$HOME/.m2"
+    script: mvn sonar:sonar -Dsonar.organization=locatetech -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONARCLOUD_TOKEN
   - stage: Compile hyperscan shared library if neccesary
     if: type NOT IN (pull_request, api, cron) AND branch = develop
     language: bash
