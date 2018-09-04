@@ -106,6 +106,10 @@ public class Database implements Closeable {
      * @return count of bytes
      */
     public long getSize() {
+        if(database == null) {
+            throw new IllegalStateException("Database has alredy been deallocated");
+        }
+
         SizeTByReference size = new SizeTByReference();
         HyperscanLibrary.INSTANCE.hs_database_size(database, size);
         return size.getValue().longValue();
@@ -113,7 +117,10 @@ public class Database implements Closeable {
 
     @Override
     protected void finalize() {
-        HyperscanLibrary.INSTANCE.hs_free_database(database);
+        if(database != null) {
+            HyperscanLibrary.INSTANCE.hs_free_database(database);
+            database = null;
+        }
     }
 
     Expression getExpression(int id) {
