@@ -41,6 +41,10 @@ public class Scanner implements Closeable {
      * @return count of bytes
      */
     public long getSize() {
+        if(scratch == null) {
+            throw new IllegalStateException("Scratch space has alredy been deallocated");
+        }
+        
         SizeTByReference size = new SizeTByReference();
         HyperscanLibrary.INSTANCE.hs_scratch_size(scratch, size);
         return size.getValue().longValue();
@@ -55,6 +59,10 @@ public class Scanner implements Closeable {
      */
     public void allocScratch(final Database db) throws Throwable {
         Pointer dbPointer = db.getPointer();
+
+        if(scratchReference == null) {
+            scratchReference = new PointerByReference();
+        }
 
         int hsError = HyperscanLibrary.INSTANCE.hs_alloc_scratch(dbPointer, scratchReference);
 
@@ -122,7 +130,12 @@ public class Scanner implements Closeable {
 
     @Override
     protected void finalize() {
-        HyperscanLibrary.INSTANCE.hs_free_scratch(scratch);
+        //check and setting scratch pointer to null to avoid double free
+        if(scratch != null) {
+            HyperscanLibrary.INSTANCE.hs_free_scratch(scratch);
+            scratch = null;
+            scratchReference = null;
+        }
     }
 
     @Override
