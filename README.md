@@ -66,24 +66,26 @@ expressions.add(new Expression("Test", EnumSet.of(ExpressionFlag.CASELESS)));
 
 //we precompile the expression into a database.
 //you can compile single expression instances or lists of expressions
-try {
-    Database db = Database.compile(expressions);
 
+//since we're interacting with native handles always use try-with-resources or call the close method after use
+try(Database db = Database.compile(expressions)) {
     //initialize scanner - one scanner per thread!
-    Scanner scanner = new Scanner();
+    //same here, always use try-with-resources or call the close method after use
+    try(Scanner scanner = new Scanner())
+    {
+        //allocate scratch space matching the passed database
+        scanner.allocScratch(db);
 
-    //allocate scratch space matching the passed database
-    scanner.allocScratch(db);
+        
+        //provide the database and the input string
+        //returns a list with matches
+        //synchronized method, only one execution at a time (use more scanner instances for multithreading)
+        List<Match> matches = scanner.scan(db, "12345 test string");
 
-    
-    //provide the database and the input string
-    //returns a list with matches
-    //synchronized method, only one execution at a time (use more scanner instances for multithreading)
-    List<Match> matches = scanner.scan(db, "12345 test string");
-
-    //matches always contain the expression causing the match and the end position of the match
-    //the start position and the matches string it self is only part of a matach if the
-    //SOM_LEFTMOST is set (for more details refer to the original hyperscan documentation)
+        //matches always contain the expression causing the match and the end position of the match
+        //the start position and the matches string it self is only part of a matach if the
+        //SOM_LEFTMOST is set (for more details refer to the original hyperscan documentation)
+    }
 }
 catch (CompileErrorException ce) {
     //gets thrown during  compile in case something with the expression is wrong
@@ -92,6 +94,7 @@ catch (CompileErrorException ce) {
 }
 catch(Throwable e) {
     //edge cases like OOM, illegal platform etc.
+}
 }
 ```
 
