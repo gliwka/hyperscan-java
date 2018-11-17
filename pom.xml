@@ -173,5 +173,11 @@
             <version>5.0.0-M6</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>5.0.0-M6</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
