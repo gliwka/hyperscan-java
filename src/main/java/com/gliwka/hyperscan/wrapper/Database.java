@@ -140,10 +140,29 @@ public class Database implements Closeable {
         this.finalize();
     }
 
+    /**
+     * Saves the expressions and the compiled database to an OutputStream.
+     * Expression contexts are not saved.
+     * The OutputStream is not closed.
+     *
+     * @param out stream to write to
+     * @throws Throwable thrown on Hyperscan errors or IOExceptions
+     */
     public void save(OutputStream out) throws Throwable {
         save(out, out);
     }
 
+    /**
+     * Saves the expressions and the compiled database to (possibly) distinct OutputStreams.
+     * All of the expressions are saved to expressionsOut before any of the database is saved to databaseOut so it's safe
+     * to use the same backing OutputStream for both parameters.
+     * Expression contexts are not saved.
+     * Neither of the OutputStream is closed.
+     *
+     * @param expressionsOut stream to write expressions to
+     * @param databaseOut stream to write database to
+     * @throws Throwable thrown on Hyperscan errors or IOExceptions
+     */
     public void save(OutputStream expressionsOut, OutputStream databaseOut) throws Throwable {
         DataOutputStream expressionsDataOut = new DataOutputStream(expressionsOut);
         // How many expressions will be present. We need this to know when to stop reading.
@@ -189,14 +208,44 @@ public class Database implements Closeable {
         }
     }
 
+    /**
+     * Loads the database saved via {@link #save(OutputStream)}.
+     * The saved payload contains platform-specific formatting so it should be loaded on a compatible platform.
+     * All Expression contexts will be null.
+     *
+     * @param in stream to read from
+     * @return loaded Database
+     * @throws Throwable thrown on Hyperscan errors or IOExceptions
+     */
     public static Database load(InputStream in) throws Throwable {
         return load(in, in);
     }
 
-    public static Database load(InputStream expressionIn, InputStream databaseIn) throws Throwable {
-        return load(expressionIn, databaseIn, (pattern, flags) -> null);
+    /**
+     * Loads the database saved via {@link #save(OutputStream, OutputStream)}.
+     * The saved payload contains platform-specific formatting so it should be loaded on a compatible platform.
+     * All Expression contexts will be null.
+     *
+     * @param expressionsIn stream to read expressions from
+     * @param databaseIn stream to read database from
+     * @return loaded Database
+     * @throws Throwable thrown on Hyperscan errors or IOExceptions
+     */
+    public static Database load(InputStream expressionsIn, InputStream databaseIn) throws Throwable {
+        return load(expressionsIn, databaseIn, (pattern, flags) -> null);
     }
 
+    /**
+     * Loads the database saved via {@link #save(OutputStream, OutputStream)}.
+     * The saved payload contains platform-specific formatting so it should be loaded on a compatible platform.
+     * Expression contexts will be recreated using the provided contextCreator.
+     *
+     * @param expressionsIn stream to read expressions from
+     * @param databaseIn stream to read database from
+     * @param contextCreator callback responsible for creating an Expression's context given its pattern and flags
+     * @return loaded Database
+     * @throws Throwable thrown on Hyperscan errors or IOExceptions
+     */
     public static Database load(InputStream expressionsIn, InputStream databaseIn,
                                 BiFunction<String, EnumSet<ExpressionFlag>, Object> contextCreator) throws Throwable {
         // DataInputStream doesn't buffer so it will only read as much as we ask for.

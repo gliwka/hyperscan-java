@@ -4,8 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.*;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.EnumSet;
@@ -150,6 +149,19 @@ class EndToEndTest {
                 //matches always contain the expression causing the match and the end position of the match
                 //the start position and the matches string it self is only part of a matach if the
                 //SOM_LEFTMOST is set (for more details refer to the original hyperscan documentation)
+            }
+
+            // Save the database to the file system for later use
+            try(OutputStream out = new FileOutputStream("db")) {
+                db.save(out);
+            }
+
+            // Later, load the database back in. This is useful for large databases that take a long time to compile.
+            // You can compile them offline, save them to a file, and then quickly load them in at runtime.
+            // The load has to happen on the same type of platform as the save.
+            try (InputStream in = new FileInputStream("db");
+                 Database loadedDb = Database.load(in)) {
+                // Use the loadedDb as before.
             }
         }
         catch (CompileErrorException ce) {
