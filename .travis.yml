@@ -37,7 +37,7 @@ jobs:
     - bash <(curl -s https://codecov.io/bash)
   - stage: Deploy to maven central
     if: tag =~ ^v
-    language: bash
+    language: java
     script: travis-build/deploy-maven-central.sh
     os: linux
     env:
