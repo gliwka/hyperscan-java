@@ -4,12 +4,13 @@ jobs:
     os: linux
     language: java
     env:
-    - secure: rx32mBGrS125APMI5nSXV5TngbDKRoowgiXJzvDXKn9PuCF8MGJOyf981j4XGV1fPC60JwQ2OMCL55zDr7p9sGAqsXeeswX2dTy9xQ6Mvd23wOS6XmK5D9wmCKNwHtZQl9oK9vmxdDLixU04oWzaBT/qNDD96oX2WKTbs4/ASQoH3iolUaZIdyKEfE98AHhwUQ2CzSb9WWpPWRvPcUR4k52XLmOfIwEQ+RgMYbtBqX7Hz/65sl+wVIlmLpUVsEZvFNE7KkJ54iiGcPAHzxywbmCUPcYX+9YBPAREAXXMia3nDTME7RwwGHaiN9tArzQuAyAgUYO8GvQTC/PbHSc31nrg+fvWt0ja2JC2cYOYUXB2GBd4Izkvjk6/8ZQmzQ8X/jWBHsvyncYHZwvunFMscc+UonzabzRzZXfebMrjuLauPZEnul8OTLIrz4u3TA7ShiCYlu/Y7EPbQjIOGxlRJzndNvaD/byWVX/U235Rz8r2IzQZ/LWv7KbwIXQv18t3BXG2jbeM7m6wIL10NXbb4ZDzqtezzwJ1H1/h1X2hmdwpTC5HTwUAu3HaSsUc1gIarDz971QLCH8uQdrcIFYZb1hNlS84M92eavNb5mTd580145O68X1S7xQNGkg1UtaMLdl2REesekpIXjZ6FyH1rk0EhYyCxeHYVUwkm/BjxW4=
+    - secure: KP9VDtEHpGBYlFReFyQ/O/iSU1kuCcczj71jZ2UliFTDo9n8iGrsHyS1eZhGgDrV5Vc6cVA0ivSq1o70uMXKFMbGUDIJN+9y7zRTPO0ktrh00UEk2c7dJCkgUktqnDyQV3H38HQcgUj/Y6tYQewwzNITeZxp7IiwLoYSSfbYLuJX6BrQBPjl25bG3WiP64ORf2PfnRNsC0FA/xN+KzGyGfUEzOEYUxKwJ5I4n1sQHXYryzXebP8fwos4XJDfTlow8y+P+1Bb5eAJEyxGYPJWa6PiKRGzI6WPRZ9QEU6hGiwDcJLJBqQBWwtQbhVCm3Fyl+7Hj9QIh8W+Q2R/osCUsQrXF+RgS76YRo3am86r+SLhZqobjnpmL3D8Ov5cKhBmhIOt8waHZj/EAIys4FLEnTAAQ6rFXdojd8fYLJbiUoMb5RFyK+4RlZ4TEoaL/IKOg3k4lDCHVgNDzE5gB4dkYskFp5Poq7bhp/UOa+3wzbbPkG1u3iCCd7z712orCMd+x1WvLLGQ/nh6XtbbEWbQ/gBygftdDEq2+LN25XrdWNeLqkskx56EdEngw8v3JLOz38or/LXXt2LxILjYNkoPMI4WFiy1PyMtHp7EI1TOhPcvfP8Kql7XisfyGdTJhKXtbQ4UHynRRN7kSTuMl5+1xUpd9YHkqwArhsh07xlFov0=
     cache:
       directories:
       - "$HOME/.m2"
       - "$HOME/.sonar/cache"
-    script: git fetch --unshallow && mvn sonar:sonar -Dsonar.organization=locatetech -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONARCLOUD_TOKEN
+    script: git fetch --unshallow && mvn sonar:sonar -Dsonar.organization=locatetech
+      -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONARCLOUD_TOKEN
   - stage: Compile hyperscan shared library if neccesary
     if: type NOT IN (pull_request, api, cron) AND branch = develop
     language: bash
@@ -33,7 +34,7 @@ jobs:
       directories:
       - "$HOME/.m2"
     after_success:
-        - bash <(curl -s https://codecov.io/bash)
+    - bash <(curl -s https://codecov.io/bash)
   - stage: Deploy to maven central
     if: tag =~ ^v
     language: bash
