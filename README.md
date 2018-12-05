@@ -1,5 +1,10 @@
 # hyperscan-java
-[![Build Status](https://travis-ci.org/LocateTech/hyperscan-java.svg?branch=master)](https://travis-ci.org/LocateTech/hyperscan-java) [![](https://jitpack.io/v/LocateTech/hyperscan-java.svg)](https://jitpack.io/#LocateTech/hyperscan-java)
+[![Maven Central](https://img.shields.io/maven-central/v/com.gliwka.hyperscan/hyperscan.svg?label=Maven%20Central)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.gliwka.hyperscan%22%20a%3A%22hyperscan%22)
+[![Build Status](https://travis-ci.org/LocateTech/hyperscan-java.svg?branch=master)](https://travis-ci.org/LocateTech/hyperscan-java)
+[![codecov](https://codecov.io/gh/LocateTech/hyperscan-java/branch/develop/graph/badge.svg)](https://codecov.io/gh/LocateTech/hyperscan-java)
+[![Code Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=com.gliwka.hyperscan%3Ahyperscan&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.gliwka.hyperscan%3Ahyperscan)
+
+
 
 [hyperscan](https://github.com/intel/hyperscan) is a high-performance multiple regex matching library.
 
@@ -7,23 +12,6 @@ It uses hybrid automata techniques to allow simultaneous matching of large numbe
 
 
 This project is a third-party developed JNA based java wrapper for the [hyperscan](https://github.com/intel/hyperscan) project to enable developers to integrate hyperscan in their java (JVM) based projects.
-
-## Limitations of hyperscan-java
-
-It currently works on OS X and Linux, only! We currently only ship precompiled binaries for 64-bit (x86_64).
-
-hyperscan only supports a subset of regular expressions. Notable exceptions are for example backreferences and capture groups. Please read the [hyperscan developer reference](https://intel.github.io/hyperscan/dev-reference/) so you get a good unterstanding how hyperscan works and what the limitations are.
-
-hyperscan will only run on x86 processors in 64-bit and 32-bit modes and takes advantage of special instruction sets, when available. Check the original [project documentation](https://intel.github.io/hyperscan/dev-reference/getting_started.html#hardware) to learn more.
-
-## Dependencies
-This wrapper only relies on the hyperscan shared library for it's functionality. It already contains precompiled 64-bit shared libraries for macOS and 64-bit libraries for most glibc (>=2.17) based Linux distributions.
-
-#### Compile yourself
-In case the precompiled binaries don't suite your usecase or architecture, you got to 
-make sure you've got hyperscan compiled as a shared library on your system. On Linux and macOS a ```mkdir build && cd build && cmake -DBUILD_SHARED_LIBS=YES .. && make``` inside the git repositiory was enough. For more information about how to compile hyperscan visit the [project documentation](https://intel.github.io/hyperscan/dev-reference/).
-
-Make sure you specify the system property ```jna.library.path``` using code or the command line to point to a location which includes the hyperscan shared libraries.
 
 ## Add it to your project
 This project is available on maven central.
@@ -33,19 +21,19 @@ This project is available on maven central.
 <dependency>
     <groupId>com.gliwka.hyperscan</groupId>
     <artifactId>hyperscan</artifactId>
-    <version>0.5.0</version>
+    <version>0.5.1</version>
 </dependency
 ```
 
 #### Gradle
 
 ```gradle
-compile group: 'com.gliwka.hyperscan', name: 'hyperscan', version: '0.5.0'
+compile group: 'com.gliwka.hyperscan', name: 'hyperscan', version: '0.5.1'
 ```
 
 #### sbt
 ```sbt
-libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "0.5.0"
+libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "0.5.1"
 ```
 
 ## Simple example
@@ -86,6 +74,19 @@ try(Database db = Database.compile(expressions)) {
         //the start position and the matches string it self is only part of a matach if the
         //SOM_LEFTMOST is set (for more details refer to the original hyperscan documentation)
     }
+
+    // Save the database to the file system for later use
+    try(OutputStream out = new FileOutputStream("db")) {
+        db.save(out);
+    }
+
+    // Later, load the database back in. This is useful for large databases that take a long time to compile.
+    // You can compile them offline, save them to a file, and then quickly load them in at runtime.
+    // The load has to happen on the same type of platform as the save.
+    try (InputStream in = new FileInputStream("db");
+         Database loadedDb = Database.load(in)) {
+        // Use the loadedDb as before.
+    }
 }
 catch (CompileErrorException ce) {
     //gets thrown during  compile in case something with the expression is wrong
@@ -97,6 +98,25 @@ catch(Throwable e) {
 }
 }
 ```
+
+
+## Limitations of hyperscan-java
+
+It currently works on OS X and Linux, only! We currently only ship precompiled binaries for 64-bit (x86_64).
+
+hyperscan only supports a subset of regular expressions. Notable exceptions are for example backreferences and capture groups. Please read the [hyperscan developer reference](https://intel.github.io/hyperscan/dev-reference/) so you get a good unterstanding how hyperscan works and what the limitations are.
+
+hyperscan will only run on x86 processors in 64-bit and 32-bit modes and takes advantage of special instruction sets, when available. Check the original [project documentation](https://intel.github.io/hyperscan/dev-reference/getting_started.html#hardware) to learn more.
+
+## Dependencies
+This wrapper only on the hyperscan shared library for it's functionality. It already contains precompiled 64-bit shared libraries for macOS and 64-bit libraries for most glibc (>=2.17) based Linux distributions.
+
+#### Compile yourself
+In case the precompiled binaries don't suite your usecase or architecture, you got to 
+make sure you've got hyperscan compiled as a shared library on your system. On Linux and macOS a ```mkdir build && cd build && cmake -DBUILD_SHARED_LIBS=YES .. && make``` inside the git repositiory was enough. For more information about how to compile hyperscan visit the [project documentation](https://intel.github.io/hyperscan/dev-reference/).
+
+Make sure you specify the system property ```jna.library.path``` using code or the command line to point to a location which includes the hyperscan shared libraries.
+
 
 ## Javadoc
 

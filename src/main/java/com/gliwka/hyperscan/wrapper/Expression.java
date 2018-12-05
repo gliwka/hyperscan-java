@@ -7,6 +7,7 @@ import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 
 import java.util.EnumSet;
+import java.util.Objects;
 
 
 /**
@@ -191,5 +192,20 @@ public class Expression {
         if(expression == null) {
             throw new NullPointerException("Null value for expression is not allowed");
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Expression that = (Expression) o;
+        return Objects.equals(flags, that.flags) &&
+                Objects.equals(expression, that.expression) &&
+                Objects.equals(context, that.context);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(flags, expression, context);
     }
 }

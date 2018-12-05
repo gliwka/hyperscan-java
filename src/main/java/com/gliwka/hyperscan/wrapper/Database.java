@@ -2,14 +2,18 @@ package com.gliwka.hyperscan.wrapper;
 
 import com.gliwka.hyperscan.jna.CompileErrorStruct;
 import com.gliwka.hyperscan.jna.HyperscanLibrary;
+import com.gliwka.hyperscan.jna.SizeT;
 import com.gliwka.hyperscan.jna.SizeTByReference;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Database containing compiled expressions ready for scanning using the Scanner
@@ -127,8 +131,156 @@ public class Database implements Closeable {
         return expressions.get(id);
     }
 
+    int getExpressionCount() {
+        return expressions.size();
+    }
+
     @Override
     public void close() throws IOException {
         this.finalize();
+    }
+
+    /**
+     * Saves the expressions and the compiled database to an OutputStream.
+     * Expression contexts are not saved.
+     * The OutputStream is not closed.
+     *
+     * @param out stream to write to
+     * @throws Throwable thrown on Hyperscan errors or IOExceptions
+     */
+    public void save(OutputStream out) throws Throwable {
+        save(out, out);
+    }
+
+    /**
+     * Saves the expressions and the compiled database to (possibly) distinct OutputStreams.
+     * All of the expressions are saved to expressionsOut before any of the database is saved to databaseOut so it's safe
+     * to use the same backing OutputStream for both parameters.
+     * Expression contexts are not saved.
+     * Neither of the OutputStream is closed.
+     *
+     * @param expressionsOut stream to write expressions to
+     * @param databaseOut stream to write database to
+     * @throws Throwable thrown on Hyperscan errors or IOExceptions
+     */
+    public void save(OutputStream expressionsOut, OutputStream databaseOut) throws Throwable {
+        DataOutputStream expressionsDataOut = new DataOutputStream(expressionsOut);
+        // How many expressions will be present. We need this to know when to stop reading.
+        expressionsDataOut.writeInt(expressions.size());
+        for (Expression expression : expressions) {
+            // Expression pattern
+            expressionsDataOut.writeUTF(expression.getExpression());
+            // Flag count
+            EnumSet<ExpressionFlag> flags = expression.getFlags();
+            expressionsDataOut.writeInt(flags.size());
+            for (ExpressionFlag flag : flags) {
+                // Bitmask for each flag
+                expressionsDataOut.writeInt(flag.getBits());
+            }
+        }
+        expressionsDataOut.flush();
+
+        // Serialize the database into a contiguous native memory block
+        PointerByReference bytesRef = new PointerByReference();
+        SizeTByReference lengthRef = new SizeTByReference();
+        int hsError = HyperscanLibrary.INSTANCE.hs_serialize_database(database, bytesRef, lengthRef);
+        try {
+            if (hsError != 0) {
+                throw Util.hsErrorIntToException(hsError);
+            }
+
+            int length = lengthRef.getValue().intValue();
+
+            // Write the native memory to the output stream.
+            // We could just load all the native memory onto the heap but that would double our memory usage.
+            // Instead we copy small blocks at a time
+            ByteBuffer buffer = bytesRef.getValue().getByteBuffer(0, length);
+
+            DataOutputStream databaseDataOut = new DataOutputStream(databaseOut);
+            databaseDataOut.writeInt(length);
+            // Neither DataOutputStream nor WritableByteChannel buffer so we can intermix usage.
+            Channels.newChannel(databaseDataOut).write(buffer);
+            databaseDataOut.flush();
+        } finally {
+            // hs_misc_free should ideally be used to clean up but that's difficult to get a hold of and we don't provide
+            // a mechanism to change it from its default value of free anyway so we'll use free directly.
+            HyperscanLibrary.INSTANCE.free(bytesRef.getValue());
+        }
+    }
+
+    /**
+     * Loads the database saved via {@link #save(OutputStream)}.
+     * The saved payload contains platform-specific formatting so it should be loaded on a compatible platform.
+     * All Expression contexts will be null.
+     *
+     * @param in stream to read from
+     * @return loaded Database
+     * @throws Throwable thrown on Hyperscan errors or IOExceptions
+     */
+    public static Database load(InputStream in) throws Throwable {
+        return load(in, in);
+    }
+
+    /**
+     * Loads the database saved via {@link #save(OutputStream, OutputStream)}.
+     * The saved payload contains platform-specific formatting so it should be loaded on a compatible platform.
+     * All Expression contexts will be null.
+     *
+     * @param expressionsIn stream to read expressions from
+     * @param databaseIn stream to read database from
+     * @return loaded Database
+     * @throws Throwable thrown on Hyperscan errors or IOExceptions
+     */
+    public static Database load(InputStream expressionsIn, InputStream databaseIn) throws Throwable {
+        return load(expressionsIn, databaseIn, (pattern, flags) -> null);
+    }
+
+    /**
+     * Loads the database saved via {@link #save(OutputStream, OutputStream)}.
+     * The saved payload contains platform-specific formatting so it should be loaded on a compatible platform.
+     * Expression contexts will be recreated using the provided contextCreator.
+     *
+     * @param expressionsIn stream to read expressions from
+     * @param databaseIn stream to read database from
+     * @param contextCreator callback responsible for creating an Expression's context given its pattern and flags
+     * @return loaded Database
+     * @throws Throwable thrown on Hyperscan errors or IOExceptions
+     */
+    public static Database load(InputStream expressionsIn, InputStream databaseIn,
+                                BiFunction<String, EnumSet<ExpressionFlag>, Object> contextCreator) throws Throwable {
+        // DataInputStream doesn't buffer so it will only read as much as we ask for.
+        // This makes it safe to use even if expressionsIn and databaseIn are the same streams.
+        DataInputStream expressionsDataIn = new DataInputStream(expressionsIn);
+        int expressionCount = expressionsDataIn.readInt();
+        List<Expression> expressions = new ArrayList<>(expressionCount);
+
+        // Setup a lookup map for expression flags
+        Map<Integer, ExpressionFlag> bitmaskToFlag = Arrays.stream(ExpressionFlag.values())
+                .collect(Collectors.toMap(ExpressionFlag::getBits, Function.identity()));
+
+        for (int i = 0; i < expressionCount; i++) {
+            String pattern = expressionsDataIn.readUTF();
+            int flagCount = expressionsDataIn.readInt();
+            EnumSet<ExpressionFlag> flags = EnumSet.noneOf(ExpressionFlag.class);
+            for (int j = 0; j < flagCount; j++) {
+                int bitmask = expressionsDataIn.readInt();
+                flags.add(bitmaskToFlag.get(bitmask));
+
+            }
+            expressions.add(new Expression(pattern, flags, contextCreator.apply(pattern, flags)));
+        }
+
+        DataInputStream databaseDataIn = new DataInputStream(databaseIn);
+        int length = databaseDataIn.readInt();
+        byte[] bytes = new byte[length];
+        databaseDataIn.readFully(bytes, 0, length);
+
+        PointerByReference dbRef = new PointerByReference();
+        int hsError = HyperscanLibrary.INSTANCE.hs_deserialize_database(bytes, new SizeT(length), dbRef);
+        if (hsError != 0) {
+            throw Util.hsErrorIntToException(hsError);
+        }
+
+        return new Database(dbRef.getValue(), expressions);
     }
 }

@@ -1,24 +1,29 @@
 package com.gliwka.hyperscan.wrapper;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
+import java.io.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
 class EndToEndTest {
-    @Test
-    void simpleSingleExpression() {
+
+    @TestWithDatabaseRoundtrip
+    void simpleSingleExpression(SerializeDatabase serialize) {
         EnumSet<ExpressionFlag> flags = EnumSet.of(ExpressionFlag.CASELESS, ExpressionFlag.SOM_LEFTMOST);
         Expression expression = new Expression("Te?st", flags);
         Expression.ValidationResult result = expression.validate();
         assertEquals(result.getIsValid(), true);
         assertEquals(result.getErrorMessage(), "");
         try {
-            Database db = Database.compile(expression);
+            Database db = roundTrip(Database.compile(expression), serialize);
             assertTrue(db.getSize() > 0);
             Scanner scanner = new Scanner();
             scanner.allocScratch(db);
@@ -47,8 +52,8 @@ class EndToEndTest {
         }
     }
 
-    @Test
-    void simpleMultiExpression() {
+    @TestWithDatabaseRoundtrip
+    void simpleMultiExpression(SerializeDatabase serialize) {
         LinkedList<Expression> expressions = new LinkedList<Expression>();
 
         EnumSet<ExpressionFlag> flags = EnumSet.of(ExpressionFlag.CASELESS, ExpressionFlag.SOM_LEFTMOST);
@@ -57,7 +62,7 @@ class EndToEndTest {
         expressions.add(new Expression("ist", flags));
 
         try {
-            Database db = Database.compile(expressions);
+            Database db = roundTrip(Database.compile(expressions), serialize);
             assertTrue(db.getSize() > 0);
             Scanner scanner = new Scanner();
             scanner.allocScratch(db);
@@ -70,6 +75,7 @@ class EndToEndTest {
             assertTrue(scanner.getSize() > 0);
         }
         catch (Throwable e) {
+            e.printStackTrace();
             fail(e.getMessage());
         }
 
@@ -83,10 +89,10 @@ class EndToEndTest {
         }
     }
 
-    @Test
-    void infiniteRegex() {
+    @TestWithDatabaseRoundtrip
+    void infiniteRegex(SerializeDatabase serialize) {
         try {
-            Database db = Database.compile(new Expression("a|", EnumSet.of(ExpressionFlag.ALLOWEMPTY)));
+            Database db = roundTrip(Database.compile(new Expression("a|", EnumSet.of(ExpressionFlag.ALLOWEMPTY))), serialize);
             Scanner scanner = new Scanner();
             scanner.allocScratch(db);
             List<Match> matches = scanner.scan(db, "12345 test string");
@@ -134,7 +140,7 @@ class EndToEndTest {
                 //allocate scratch space matching the passed database
                 scanner.allocScratch(db);
 
-                
+
                 //provide the database and the input string
                 //returns a list with matches
                 //synchronized method, only one execution at a time (use more scanner instances for multithreading)
@@ -143,6 +149,19 @@ class EndToEndTest {
                 //matches always contain the expression causing the match and the end position of the match
                 //the start position and the matches string it self is only part of a matach if the
                 //SOM_LEFTMOST is set (for more details refer to the original hyperscan documentation)
+            }
+
+            // Save the database to the file system for later use
+            try(OutputStream out = new FileOutputStream("db")) {
+                db.save(out);
+            }
+
+            // Later, load the database back in. This is useful for large databases that take a long time to compile.
+            // You can compile them offline, save them to a file, and then quickly load them in at runtime.
+            // The load has to happen on the same type of platform as the save.
+            try (InputStream in = new FileInputStream("db");
+                 Database loadedDb = Database.load(in)) {
+                // Use the loadedDb as before.
             }
         }
         catch (CompileErrorException ce) {
@@ -155,11 +174,11 @@ class EndToEndTest {
         }
     }
 
-
-    @Test void chineseUTF8() {
+    @TestWithDatabaseRoundtrip
+    void chineseUTF8(SerializeDatabase serialize) {
         Expression expr = new Expression("测试", EnumSet.of(ExpressionFlag.UTF8));
         try {
-            Database db = Database.compile(expr);
+            Database db = roundTrip(Database.compile(expr), serialize);
             Scanner scanner = new Scanner();
             scanner.allocScratch(db);
             List<Match> matches = scanner.scan(db, "这是一个测试");
@@ -171,10 +190,11 @@ class EndToEndTest {
         }
     }
 
-    @Test void utf8MatchedString() {
+    @TestWithDatabaseRoundtrip
+    void utf8MatchedString(SerializeDatabase serialize) {
         Expression expr = new Expression("\\d{5}", EnumSet.of(ExpressionFlag.SOM_LEFTMOST, ExpressionFlag.UTF8));
         try {
-            Database db = Database.compile(expr);
+            Database db = roundTrip(Database.compile(expr), serialize);
             Scanner scanner = new Scanner();
             scanner.allocScratch(db);
             List<Match> matches = scanner.scan(db, " Menu About Us Strategy Professionals Investments Contact Contact Home / Contact 1 2 Map DataMap data ©2017 GoogleMap DataMap data ©2017 GoogleMap data ©2017 GoogleTerms of UseReport a map errorMapCustom Map RFE Investment Partners 36 Grove St New Canaan, CT, 06840 (203) 966-2800 For general inquiries: info@rfeip.com For intermediaries: deals@rfeip.com For executives: executives@rfeip.com For investors: investors@rfeip.com Copyright 2016 RFE Investment Partners Premium Barbershop is the prime spot for your hair grooming needs in find us at 75250 FAIRWAY Drive Indian Wells, CA 92210 open 24/7 New York City. Our approach is simple and efficient. We are here to provide the best hair cut, shave, or any other grooming service you may desire! Menu HOME ABOUT US SERVICES GALLERY BLOG SOCIAL CONTACT US HOME ABOUT US SERVICES GALLERY BLOG SOCIAL CONTACT US We are open 7 days (855) 692 2887 latest news Enjoy a limited time $5 discount by printing the voucher below Premium Barbershop is growing. Read More We Open A New Location on 622 3rd avenue (Lobby) (bet. 40st and 41st) Read More What we offer Manhattan barber shop Best New York barbershop Premium Barbershop always offers professional quality for all of our customers and we are ready to deal with your highest expectations. Are you looking for quality? You found it! Our services are dedicated for your personal success. Here at Premium Barbershop we have award winning staff that have demonstrated talent of master barbers at several notable styling competitions. Let our barber to be your personal stylist and you will never be disappointed. In addition we place your personal style vision above all the other things. Our master barbers always ready to give you professional advices but will also ask you about all the cut to achieve a most desirable result for you. Most of our visitors are our regular clients now. They include celebrities, business executives and many other people who want to look good and make a proper impression. Our professional service and our care about their notion makes them to leave with a smile on their faces and totally satisfied. Many of our clients claims it was a best New York barbershop, they visit. Most accessible Manhattan barber shop Our modernly equipped Barbershop is located in one step away from the business center of Manhattan – on 299 East 52nd street, between 1st and 2nd Ave. We are open 7 days a week from early morning until evening, making it possible to get a haircut during the hours most convenient for you. We won`t waste even one moment of your time. We do our work, you enjoy your time and your style. While we take care of providing you with the best style you can; watch hot political and economic news of the world on large flat screen TVs, or for sports fans we show the latest UFC and Mixed Marshall Arts Championship programs. Here at Premium Barbershop we respect your time and try our best for our services to be most accessible, most enjoyable and convenient Manhattan barber shop ever. Working Hours Mon-Fri: 8:30 AM – 7:30 PM Saturday: 9:00 AM – 6:00 PM Sunday: 10:00 AM – 5:00 PM Save $5 OFF Services Haircut services Shampoo + Cut $24.95 Long Layered Cut $24.95 Regular Haircut $21.95 Fade + Hot Towel $21.95 Children’s Haircut $18.95 Crew Cut + Shape-Up $21.95 Senior Citizen Cut $17.95 Crew Cut + Hot Towel $17.95 RAZOR SERVICES Shave $24.95 Beard Trim $9.95 Beard Trim with Razor $12.95 Clean-Up $9.95 Goatee Beard $5.95 OUR LOCATIONS 299 East 52nd street (bet. 1st and 2nd Ave) New York, NY 10022 (212) 935 - 3066 (Read More) 134 1/2 East 62nd Street (bet. Lexington & 3rd Ave) New York, NY 10021 (212) 308 - 6660 (Read More) 622 3rd avenue (Lobby) (bet. 40st and 41st) New York, NY 10017 (646) 649 - 2235 (Read More) Home About us Blog Contact us Gallery Services Social @2017 Premium Barber Shop. All Rights Reserved. ");
@@ -183,5 +203,35 @@ class EndToEndTest {
         catch(Throwable e) {
             fail(e);
         }
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @ParameterizedTest
+    @EnumSource(SerializeDatabase.class)
+    @interface TestWithDatabaseRoundtrip {}
+
+    enum SerializeDatabase {
+        DONT_SERIALIZE, SERIALIZE
+    }
+
+    private static Database roundTrip(Database db, SerializeDatabase serialize) throws Throwable {
+        if (serialize == SerializeDatabase.DONT_SERIALIZE)
+        {
+            return db;
+        }
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        db.save(baos);
+        db.close();
+
+        Database deserialized = Database.load(new ByteArrayInputStream(baos.toByteArray()));
+
+        assertEquals(db.getExpressionCount(), deserialized.getExpressionCount(), "Deserialized database must have equal expression count");
+        for (int i = 0; i < db.getExpressionCount(); i++) {
+            assertEquals(db.getExpression(i).getExpression(), deserialized.getExpression(i).getExpression(), "Expression at index " + i + " must have the same pattern");
+            assertEquals(db.getExpression(i).getFlags(), deserialized.getExpression(i).getFlags(), "Expression at index " + i + " must have the same flags");
+        }
+
+        return deserialized;
     }
 }
