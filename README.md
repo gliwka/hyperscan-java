@@ -21,31 +21,19 @@ This project is available on maven central.
 <dependency>
     <groupId>com.gliwka.hyperscan</groupId>
     <artifactId>hyperscan</artifactId>
-<<<<<<< HEAD
-    <version>0.6.0</version>
-=======
-    <version>0.6.1</version>
->>>>>>> release/0.6.1
+    <version>0.6.2</version>
 </dependency
 ```
 
 #### Gradle
 
 ```gradle
-<<<<<<< HEAD
-compile group: 'com.gliwka.hyperscan', name: 'hyperscan', version: '0.6.0'
-=======
-compile group: 'com.gliwka.hyperscan', name: 'hyperscan', version: '0.6.1'
->>>>>>> release/0.6.1
+compile group: 'com.gliwka.hyperscan', name: 'hyperscan', version: '0.6.2'
 ```
 
 #### sbt
 ```sbt
-<<<<<<< HEAD
-libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "0.6.0"
-=======
-libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "0.6.1"
->>>>>>> release/0.6.1
+libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "0.6.2"
 ```
 
 ## Simple example

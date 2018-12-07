@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.gliwka.hyperscan</groupId>
     <artifactId>hyperscan</artifactId>
-    <version>0.6.1</version>
+    <version>0.6.2</version>
     <name>hyperscan-java</name>
     <description>Java bindings for the high-performance multiple regular expression library hyperscan</description>
     <url>https://github.com/LocateTech/hyperscan-java</url>
@@ -68,6 +68,33 @@
     </profiles>
     <build>
         <plugins>
+            <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+            <plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.8</version>
+				<extensions>true</extensions>
+                <executions>
+					<execution>
+						<id>default-deploy</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<serverId>ossrh</serverId>
+                    <stagingProfileId>487fa319ba2685</stagingProfileId>
+				</configuration>
+			</plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
