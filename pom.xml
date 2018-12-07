@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.gliwka.hyperscan</groupId>
     <artifactId>hyperscan</artifactId>
-    <version>0.7.0-SNAPSHOT</version>
+    <version>0.6.2</version>
     <name>hyperscan-java</name>
     <description>Java bindings for the high-performance multiple regular expression library hyperscan</description>
     <url>https://github.com/LocateTech/hyperscan-java</url>
