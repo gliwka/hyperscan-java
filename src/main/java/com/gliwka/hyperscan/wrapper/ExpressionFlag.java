@@ -49,7 +49,17 @@ public enum ExpressionFlag implements BitFlag {
     /**
      * Report the leftmost start of match offset when a match is found.
      */
-    SOM_LEFTMOST(256);
+    SOM_LEFTMOST(256),
+
+    /**
+     * Parse this expression as logical combination syntax.
+     */
+    COMBINATION(512),
+
+    /**
+     * Ignore match reporting for this expression.
+     */
+    QUIET(1024);
 
     private final int bits;
 
