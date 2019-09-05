@@ -1,7 +1,7 @@
 # hyperscan-java
 [![Maven Central](https://img.shields.io/maven-central/v/com.gliwka.hyperscan/hyperscan.svg?label=Maven%20Central)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.gliwka.hyperscan%22%20a%3A%22hyperscan%22)
-[![Build Status](https://travis-ci.org/LocateTech/hyperscan-java.svg?branch=master)](https://travis-ci.org/LocateTech/hyperscan-java)
-[![codecov](https://codecov.io/gh/LocateTech/hyperscan-java/branch/develop/graph/badge.svg)](https://codecov.io/gh/LocateTech/hyperscan-java)
+[![Build Status](https://travis-ci.org/gliwka/hyperscan-java.svg?branch=master)](https://travis-ci.org/gliwka/hyperscan-java)
+[![codecov](https://codecov.io/gh/gliwka/hyperscan-java/branch/develop/graph/badge.svg)](https://codecov.io/gh/gliwka/hyperscan-java)
 [![Code Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=com.gliwka.hyperscan%3Ahyperscan&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.gliwka.hyperscan%3Ahyperscan)
 
 
@@ -120,7 +120,7 @@ Make sure you specify the system property ```jna.library.path``` using code or t
 
 ## Javadoc
 
-The javadoc is located [here](https://LocateTech.github.io/hyperscan-java/).
+The javadoc is located [here](https://gliwka.github.io/hyperscan-java/).
 
 
 
