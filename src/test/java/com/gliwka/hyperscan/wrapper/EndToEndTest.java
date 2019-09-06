@@ -7,9 +7,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.io.*;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.EnumSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -205,6 +203,65 @@ class EndToEndTest {
         }
     }
 
+    @TestWithDatabaseRoundtrip
+    void logicalCombination(SerializeDatabase serialize) {
+        List<String> expressionStrings = Arrays.asList(
+                "abc", //201 0
+                "def", //202 1
+                "foobar.*gh", //203 2
+                "teakettle{4,10}",  //204 3
+                "ijkl[mMn]", //205  4
+                "(0 & 1 & 2) | (3 & !4)", //1001  5
+                "(0 | 1 & 2) & (!3 | 4)", // 1002 6
+                "((0 | 1) & 2) & (3 | 4)");// 1003 7
+        List<EnumSet<ExpressionFlag>> flags = Arrays.asList(
+                EnumSet.of(ExpressionFlag.QUIET),
+                EnumSet.of(ExpressionFlag.QUIET),
+                EnumSet.of(ExpressionFlag.QUIET),
+                EnumSet.of(ExpressionFlag.NO_FLAG),
+                EnumSet.of(ExpressionFlag.QUIET),
+                EnumSet.of(ExpressionFlag.COMBINATION),
+                EnumSet.of(ExpressionFlag.COMBINATION),
+                EnumSet.of(ExpressionFlag.COMBINATION)
+        );
+        List<Expression> expressions = buildExpressions(expressionStrings, flags);
+
+        try {
+            Database db = roundTrip(Database.compile(expressions), serialize);
+            Scanner scanner = new Scanner();
+            scanner.allocScratch(db);
+            List<Match> matches = scanner.scan(db, "abbdefxxfoobarrrghabcxdefxteakettleeeeexxxxijklmxxdef");
+                                                        //01234567890123456789012345678901234567890123456789012
+            assertEquals(17, matches.size());
+            assertMatch(17, expressionStrings.get(6), matches.get(0));
+            assertMatch(20, expressionStrings.get(5), matches.get(1));
+            assertMatch(20, expressionStrings.get(6), matches.get(2));
+            assertMatch(24, expressionStrings.get(5), matches.get(3));
+            assertMatch(24, expressionStrings.get(6), matches.get(4));
+            assertMatch(37, expressionStrings.get(3), matches.get(5));
+            assertMatch(37, expressionStrings.get(5), matches.get(6));
+            assertMatch(37, expressionStrings.get(7), matches.get(7));
+            assertMatch(38, expressionStrings.get(3), matches.get(8));
+            assertMatch(38, expressionStrings.get(5), matches.get(9));
+            assertMatch(38, expressionStrings.get(7), matches.get(10));
+            assertMatch(47, expressionStrings.get(5), matches.get(11));
+            assertMatch(47, expressionStrings.get(6), matches.get(12));
+            assertMatch(47, expressionStrings.get(7), matches.get(13));
+            assertMatch(52, expressionStrings.get(5), matches.get(14));
+            assertMatch(52, expressionStrings.get(6), matches.get(15));
+            assertMatch(52, expressionStrings.get(7), matches.get(16));
+        }
+        catch(Throwable e) {
+            fail(e);
+        }
+    }
+
+    private void assertMatch(int expectedEndPosition, String expectedExpression, Match actualMatch) {
+        assertEquals(expectedEndPosition, actualMatch.getEndPosition());
+        assertEquals(expectedExpression, actualMatch.getMatchedExpression().getExpression());
+    }
+
+
     @Retention(RetentionPolicy.RUNTIME)
     @ParameterizedTest
     @EnumSource(SerializeDatabase.class)
@@ -233,5 +290,13 @@ class EndToEndTest {
         }
 
         return deserialized;
+    }
+
+    private List<Expression> buildExpressions(List<String> expressionStrings, List<EnumSet<ExpressionFlag>> flags){
+        List<Expression> expressions = new ArrayList<>();
+        for (int i = 0; i < expressionStrings.size(); i++) {
+            expressions.add(new Expression(expressionStrings.get(i), flags.get(i)));
+        }
+        return expressions;
     }
 }
