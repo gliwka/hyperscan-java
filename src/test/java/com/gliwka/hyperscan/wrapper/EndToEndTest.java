@@ -206,14 +206,14 @@ class EndToEndTest {
     @TestWithDatabaseRoundtrip
     void logicalCombination(SerializeDatabase serialize) {
         List<String> expressionStrings = Arrays.asList(
-                "abc", //201 0
-                "def", //202 1
-                "foobar.*gh", //203 2
-                "teakettle{4,10}",  //204 3
-                "ijkl[mMn]", //205  4
-                "(0 & 1 & 2) | (3 & !4)", //1001  5
-                "(0 | 1 & 2) & (!3 | 4)", // 1002 6
-                "((0 | 1) & 2) & (3 | 4)");// 1003 7
+                "abc",
+                "def",
+                "foobar.*gh",
+                "teakettle{4,10}",
+                "ijkl[mMn]",
+                "(0 & 1 & 2) | (3 & !4)",
+                "(0 | 1 & 2) & (!3 | 4)",
+                "((0 | 1) & 2) & (3 | 4)");
         List<EnumSet<ExpressionFlag>> flags = Arrays.asList(
                 EnumSet.of(ExpressionFlag.QUIET),
                 EnumSet.of(ExpressionFlag.QUIET),
