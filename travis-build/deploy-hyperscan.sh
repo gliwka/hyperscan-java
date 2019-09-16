@@ -15,14 +15,14 @@ if [ -n "$(grep '#rebuild' <<< "$TRAVIS_COMMIT_MESSAGE")" ]  ; then
     bash travis-build/build-$TARGET_OS-$TARGET_ARCH.sh
     cd $TRAVIS_BUILD_DIR
     echo "Decrypt deployment key"
-    openssl aes-256-cbc -K $encrypted_1acfec761134_key -iv $encrypted_1acfec761134_iv -in travis-build/hyperscan-builder.enc -out /tmp/hyperscan-builder -d
-    chmod 600 /tmp/hyperscan-builder
+    openssl aes-256-cbc -K $encrypted_13a362132342_key -iv $encrypted_13a362132342_iv -in travis-build/deploy-key.enc -out /tmp/deploy-key -d
+    chmod 600 /tmp/deploy-key
     eval `ssh-agent -s`
-    ssh-add /tmp/hyperscan-builder
+    ssh-add /tmp/deploy-key
     git add src/main/resources
     git checkout $TRAVIS_BRANCH
-    git config user.name "cerebuild Bot"
-    git config user.email "mg@devleads.io"
+    git config user.name "Travis Build Script"
+    git config user.email "matthias@gliwka.eu"
     git commit -m "Add shared libraries for hyperscan $HYPERSCAN_VERSION ($TARGET_OS $TARGET_ARCH) [ci skip]"
     REPO=`git config remote.origin.url`
     SSH_REPO=${REPO/https:\/\/github.com\//git@github.com:}

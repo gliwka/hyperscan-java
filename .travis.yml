@@ -30,6 +30,8 @@ jobs:
   - stage: Test java bindings and create coverage report
     os: linux
     language: java
+    jdk:
+    - openjdk8    
     cache:
       directories:
       - "$HOME/.m2"
@@ -38,6 +40,8 @@ jobs:
   - stage: Deploy to maven central
     if: tag =~ ^v
     language: java
+    jdk:
+    - openjdk8
     script: travis-build/deploy-maven-central.sh
     os: linux
     env:

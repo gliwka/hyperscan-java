@@ -29,7 +29,7 @@ public class Database implements Closeable {
         this.expressions = expressions;
     }
 
-    private static void handleErrors(int hsError, Pointer compileError, List<Expression> expressions) throws Throwable {
+    private static void handleErrors(int hsError, Pointer compileError, List<Expression> expressions) throws CompileErrorException {
         if(hsError == 0)
             return;
 
@@ -52,9 +52,8 @@ public class Database implements Closeable {
      * compile an expression into a database to use for scanning
      * @param expression Expression to compile
      * @return Compiled database
-     * @throws Throwable CompileErrorException on errors concerning the pattern, otherwise different Throwable's
      */
-    public static Database compile(Expression expression) throws Throwable {
+    public static Database compile(Expression expression) throws CompileErrorException {
         PointerByReference database = new PointerByReference();
         PointerByReference error = new PointerByReference();
 
@@ -74,9 +73,8 @@ public class Database implements Closeable {
      * Compiles an list of expressions into a database to use for scanning
      * @param expressions List of expressions to compile
      * @return Compiled database
-     * @throws Throwable CompileErrorException on errors concerning the pattern, otherwise different Throwable's
      */
-    public static Database compile(List<Expression> expressions) throws Throwable {
+    public static Database compile(List<Expression> expressions) throws CompileErrorException {
         final int expressionsSize = expressions.size();
 
         String[] expressionsStr = new String[expressionsSize];
@@ -146,9 +144,8 @@ public class Database implements Closeable {
      * The OutputStream is not closed.
      *
      * @param out stream to write to
-     * @throws Throwable thrown on Hyperscan errors or IOExceptions
      */
-    public void save(OutputStream out) throws Throwable {
+    public void save(OutputStream out) throws IOException {
         save(out, out);
     }
 
@@ -161,9 +158,8 @@ public class Database implements Closeable {
      *
      * @param expressionsOut stream to write expressions to
      * @param databaseOut stream to write database to
-     * @throws Throwable thrown on Hyperscan errors or IOExceptions
      */
-    public void save(OutputStream expressionsOut, OutputStream databaseOut) throws Throwable {
+    public void save(OutputStream expressionsOut, OutputStream databaseOut) throws IOException {
         DataOutputStream expressionsDataOut = new DataOutputStream(expressionsOut);
         // How many expressions will be present. We need this to know when to stop reading.
         expressionsDataOut.writeInt(expressions.size());
@@ -215,9 +211,8 @@ public class Database implements Closeable {
      *
      * @param in stream to read from
      * @return loaded Database
-     * @throws Throwable thrown on Hyperscan errors or IOExceptions
      */
-    public static Database load(InputStream in) throws Throwable {
+    public static Database load(InputStream in) throws IOException {
         return load(in, in);
     }
 
@@ -229,9 +224,8 @@ public class Database implements Closeable {
      * @param expressionsIn stream to read expressions from
      * @param databaseIn stream to read database from
      * @return loaded Database
-     * @throws Throwable thrown on Hyperscan errors or IOExceptions
      */
-    public static Database load(InputStream expressionsIn, InputStream databaseIn) throws Throwable {
+    public static Database load(InputStream expressionsIn, InputStream databaseIn) throws IOException {
         return load(expressionsIn, databaseIn, (pattern, flags) -> null);
     }
 
@@ -244,10 +238,9 @@ public class Database implements Closeable {
      * @param databaseIn stream to read database from
      * @param contextCreator callback responsible for creating an Expression's context given its pattern and flags
      * @return loaded Database
-     * @throws Throwable thrown on Hyperscan errors or IOExceptions
      */
     public static Database load(InputStream expressionsIn, InputStream databaseIn,
-                                BiFunction<String, EnumSet<ExpressionFlag>, Object> contextCreator) throws Throwable {
+                                BiFunction<String, EnumSet<ExpressionFlag>, Object> contextCreator) throws IOException {
         // DataInputStream doesn't buffer so it will only read as much as we ask for.
         // This makes it safe to use even if expressionsIn and databaseIn are the same streams.
         DataInputStream expressionsDataIn = new DataInputStream(expressionsIn);

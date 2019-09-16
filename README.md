@@ -1,7 +1,7 @@
 # hyperscan-java
 [![Maven Central](https://img.shields.io/maven-central/v/com.gliwka.hyperscan/hyperscan.svg?label=Maven%20Central)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.gliwka.hyperscan%22%20a%3A%22hyperscan%22)
-[![Build Status](https://travis-ci.org/LocateTech/hyperscan-java.svg?branch=master)](https://travis-ci.org/LocateTech/hyperscan-java)
-[![codecov](https://codecov.io/gh/LocateTech/hyperscan-java/branch/develop/graph/badge.svg)](https://codecov.io/gh/LocateTech/hyperscan-java)
+[![Build Status](https://travis-ci.org/gliwka/hyperscan-java.svg?branch=master)](https://travis-ci.org/gliwka/hyperscan-java)
+[![codecov](https://codecov.io/gh/gliwka/hyperscan-java/branch/develop/graph/badge.svg)](https://codecov.io/gh/gliwka/hyperscan-java)
 [![Code Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=com.gliwka.hyperscan%3Ahyperscan&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.gliwka.hyperscan%3Ahyperscan)
 
 
@@ -21,19 +21,19 @@ This project is available on maven central.
 <dependency>
     <groupId>com.gliwka.hyperscan</groupId>
     <artifactId>hyperscan</artifactId>
-    <version>0.6.2</version>
-</dependency
+    <version>1.0.0</version>
+</dependency>
 ```
 
 #### Gradle
 
 ```gradle
-compile group: 'com.gliwka.hyperscan', name: 'hyperscan', version: '0.6.2'
+compile group: 'com.gliwka.hyperscan', name: 'hyperscan', version: '1.0.0'
 ```
 
 #### sbt
 ```sbt
-libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "0.6.2"
+libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "1.0.0"
 ```
 
 ## Simple example
@@ -64,7 +64,7 @@ try(Database db = Database.compile(expressions)) {
         //allocate scratch space matching the passed database
         scanner.allocScratch(db);
 
-        
+
         //provide the database and the input string
         //returns a list with matches
         //synchronized method, only one execution at a time (use more scanner instances for multithreading)
@@ -93,9 +93,8 @@ catch (CompileErrorException ce) {
     //you can retrieve the expression causing the exception like this:
     Expression failedExpression = ce.getFailedExpression();
 }
-catch(Throwable e) {
-    //edge cases like OOM, illegal platform etc.
-}
+catch(IOException ie) {
+  //IO during serializing / deserializing failed
 }
 ```
 
@@ -120,7 +119,7 @@ Make sure you specify the system property ```jna.library.path``` using code or t
 
 ## Javadoc
 
-The javadoc is located [here](https://LocateTech.github.io/hyperscan-java/).
+The javadoc is located [here](https://gliwka.github.io/hyperscan-java/).
 
 
 
@@ -132,7 +131,6 @@ If you just want to use hyperscan in java, you only need to import ```com.gliwka
 
 
 ## Currently not implemented
- * Serialization and Deserialization of databases
  * Extended expression syntax using [hs_compile_ext_multi()](http://intel.github.io/hyperscan/dev-reference/api_files.html#project0hs__compile_8h_1aacc508bea3042f1faba32c3818bfc2a3)
 
 

@@ -6,6 +6,12 @@ package com.gliwka.hyperscan.wrapper;
 public enum ExpressionFlag implements BitFlag {
 
     /**
+     * Expression will be compiled with no flags.
+     */
+    NO_FLAG(0),
+
+
+    /**
      * Matching will be performed case-insensitively.
      */
     CASELESS(1),
@@ -49,7 +55,17 @@ public enum ExpressionFlag implements BitFlag {
     /**
      * Report the leftmost start of match offset when a match is found.
      */
-    SOM_LEFTMOST(256);
+    SOM_LEFTMOST(256),
+
+    /**
+     * Parse the expression in logical combination syntax.
+     */
+    COMBINATION(512),
+
+    /**
+     * Ignore match reporting for this expression. Used for the sub-expressions in logical combinations.
+     */
+    QUIET(1024);
 
     private final int bits;
 
