@@ -143,7 +143,9 @@ If you just want to use hyperscan in java, you only need to import ```com.gliwka
  All development happens on feature branches. ```develop``` is the integration branch. The ```master``` branch only contains production-ready code. All releases are tagged.
 
 ## Credits
-Shoutout to [@eliaslevy](https://github.com/eliaslevy) for all the great contributions and to the hyperscan team for this great library!
+Shoutout to [@eliaslevy](https://github.com/eliaslevy), [@krzysztofzienkiewicz](https://github.com/krzysztofzienkiewicz) and [@swapnilnawale](https://github.com/swapnilnawale) for all the great contributions.
+
+Thanks to Intel for opensourcing hyperscan!
 
 ## License
 [BSD 3-Clause License](LICENSE)
