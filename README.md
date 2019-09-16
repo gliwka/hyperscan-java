@@ -21,19 +21,19 @@ This project is available on maven central.
 <dependency>
     <groupId>com.gliwka.hyperscan</groupId>
     <artifactId>hyperscan</artifactId>
-    <version>0.6.2</version>
-</dependency
+    <version>1.0.0</version>
+</dependency>
 ```
 
 #### Gradle
 
 ```gradle
-compile group: 'com.gliwka.hyperscan', name: 'hyperscan', version: '0.6.2'
+compile group: 'com.gliwka.hyperscan', name: 'hyperscan', version: '1.0.0'
 ```
 
 #### sbt
 ```sbt
-libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "0.6.2"
+libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "1.0.0"
 ```
 
 ## Simple example
@@ -131,7 +131,6 @@ If you just want to use hyperscan in java, you only need to import ```com.gliwka
 
 
 ## Currently not implemented
- * Serialization and Deserialization of databases
  * Extended expression syntax using [hs_compile_ext_multi()](http://intel.github.io/hyperscan/dev-reference/api_files.html#project0hs__compile_8h_1aacc508bea3042f1faba32c3818bfc2a3)
 
 
