@@ -21,7 +21,7 @@ class DeallocationTest {
         catch(IllegalStateException e) {
             //expected
         }
-        catch(Throwable t) {
+        catch(Exception t) {
             fail(t);
         }
     }
@@ -39,7 +39,7 @@ class DeallocationTest {
         catch(IllegalStateException e) {
             //expected
         }
-        catch(Throwable t) {
+        catch(Exception t) {
             fail(t);
         }
     }

@@ -54,10 +54,8 @@ public class Scanner implements Closeable {
      * Allocate a scratch space.  Must be called at least once with each
      * database that will be used before scan is called.
      * @param db Database containing expressions to use for matching
-     * @throws Throwable Throws if out of memory or platform not supported
-     * or if the allocation fails
      */
-    public void allocScratch(final Database db) throws Throwable {
+    public void allocScratch(final Database db) {
         Pointer dbPointer = db.getPointer();
 
         if(scratchReference == null) {
@@ -89,9 +87,8 @@ public class Scanner implements Closeable {
      * @param db Database containing expressions to use for matching
      * @param input String to match against
      * @return List of Matches
-     * @throws Throwable Throws if out of memory, platform not supported or database is null
      */
-    public List<Match> scan(final Database db, final String input) throws Throwable {
+    public List<Match> scan(final Database db, final String input) {
         Pointer dbPointer = db.getPointer();
 
         final byte[] utf8bytes = input.getBytes(StandardCharsets.UTF_8);
