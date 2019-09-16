@@ -64,7 +64,7 @@ try(Database db = Database.compile(expressions)) {
         //allocate scratch space matching the passed database
         scanner.allocScratch(db);
 
-        
+
         //provide the database and the input string
         //returns a list with matches
         //synchronized method, only one execution at a time (use more scanner instances for multithreading)
@@ -93,9 +93,8 @@ catch (CompileErrorException ce) {
     //you can retrieve the expression causing the exception like this:
     Expression failedExpression = ce.getFailedExpression();
 }
-catch(Throwable e) {
-    //edge cases like OOM, illegal platform etc.
-}
+catch(IOException ie) {
+  //IO during serializing / deserializing failed
 }
 ```
 
