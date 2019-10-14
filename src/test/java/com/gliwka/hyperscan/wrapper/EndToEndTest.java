@@ -114,6 +114,38 @@ class EndToEndTest {
     }
 
     @Test
+    void emptyStringMatch() {
+        try {
+
+            Database db = Database.compile(new Expression(".*", EnumSet.of(ExpressionFlag.ALLOWEMPTY)));
+            Scanner scanner = new Scanner();
+            scanner.allocScratch(db);
+            final List<Match> matcher = scanner.scan(db,"");
+            assertTrue(matcher.size() > 0);
+            assertEquals("", matcher.get(0).getMatchedString());
+
+        }
+        catch(Exception t) {
+            fail(t);
+        }
+    }
+
+    @Test
+    void emptyStringNoMatch() {
+        try {
+
+            Database db = Database.compile(new Expression(".+", EnumSet.of(ExpressionFlag.ALLOWEMPTY)));
+            Scanner scanner = new Scanner();
+            scanner.allocScratch(db);
+            final List<Match> matcher = scanner.scan(db,"");
+            assertTrue(matcher.isEmpty());
+
+        }
+        catch(Exception t) {
+            fail(t);
+        }
+    }
+    @Test
     void readmeExample() {
         //we define a list containing all of our expressions
         LinkedList<Expression> expressions = new LinkedList<Expression>();

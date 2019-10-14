@@ -119,7 +119,11 @@ public class Scanner implements Closeable {
                 match = input.substring(startIndex, endIndex + 1);
             }
 
-            matches.add(new Match(byteToIndex[(int)from], byteToIndex[(int)to - 1], match, matchingExpression));
+            if (byteToIndex.length>0) {
+                matches.add(new Match(byteToIndex[(int) from], byteToIndex[(int) to - 1], match, matchingExpression));
+            } else {
+                matches.add(new Match(0, 0, match, matchingExpression));
+            }
         });
 
         return matches;
