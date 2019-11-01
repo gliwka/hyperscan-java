@@ -12,7 +12,7 @@ jobs:
     script: git fetch --unshallow && mvn sonar:sonar -Dsonar.organization=locatetech
       -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONARCLOUD_TOKEN
   - stage: Compile hyperscan shared library if neccesary
-    if: type NOT IN (pull_request, api, cron) AND branch = develop
+    if: type NOT IN (pull_request, api, cron)
     language: bash
     script: travis-build/deploy-hyperscan.sh
     os: linux
@@ -21,7 +21,7 @@ jobs:
     services:
     - docker
   - stage: Compile hyperscan shared library if neccesary
-    if: type NOT IN (pull_request, api, cron) AND branch = develop
+    if: type NOT IN (pull_request, api, cron)
     language: bash
     script: travis-build/deploy-hyperscan.sh
     os: osx
