@@ -164,7 +164,7 @@ public class Expression {
             HyperscanLibrary.INSTANCE.hs_free_compile_error(errorStruct);
         }
         else {
-            Native.free(Pointer.nativeValue(info.getValue()));
+            Native.free(Pointer.nativeValue(info.getPointer()));
         }
 
         return new ValidationResult(errorMessage, isValid);

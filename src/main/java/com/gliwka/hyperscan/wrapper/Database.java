@@ -4,6 +4,7 @@ import com.gliwka.hyperscan.jna.CompileErrorStruct;
 import com.gliwka.hyperscan.jna.HyperscanLibrary;
 import com.gliwka.hyperscan.jna.SizeT;
 import com.gliwka.hyperscan.jna.SizeTByReference;
+import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.PointerByReference;
 
@@ -200,7 +201,7 @@ public class Database implements Closeable {
         } finally {
             // hs_misc_free should ideally be used to clean up but that's difficult to get a hold of and we don't provide
             // a mechanism to change it from its default value of free anyway so we'll use free directly.
-            HyperscanLibrary.INSTANCE.free(bytesRef.getValue());
+            Native.free(Pointer.nativeValue(bytesRef.getPointer()));
         }
     }
 

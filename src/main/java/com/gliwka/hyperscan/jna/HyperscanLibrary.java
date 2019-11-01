@@ -24,9 +24,7 @@ public interface HyperscanLibrary extends Library {
     int hs_serialize_database(Pointer database, PointerByReference bytes, SizeTByReference length);
 
     int hs_deserialize_database(byte[] bytes, SizeT length, PointerByReference db);
-
-    void free(Pointer ptr);
-
+    
     int hs_database_size(Pointer database, SizeTByReference database_size);
 
     int hs_database_info(Pointer database, PointerByReference info);
