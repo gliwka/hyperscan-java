@@ -5,7 +5,7 @@ set -xeu
 set -o pipefail
 
 echo Building on OS X
-cd /tmp/hyperscan
+cd hyperscan
 
 echo Update homebrew
 brew update
