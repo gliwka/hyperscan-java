@@ -30,6 +30,7 @@ if [ -n "$(grep '#rebuild' <<< "$TRAVIS_COMMIT_MESSAGE")" ]  ; then
     cat travis-build/github-hostkey >> ~/.ssh/known_hosts
     git pull --rebase $SSH_REPO $TRAVIS_BRANCH
     git push $SSH_REPO $TRAVIS_BRANCH
+    ssh-agent -k
 else
     echo "No rebuild command detected"
 fi
