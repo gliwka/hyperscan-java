@@ -7,7 +7,7 @@ import com.sun.jna.ptr.PointerByReference;
 
 
 public interface HyperscanLibrary extends Library {
-    Map opts = new HashMap() { {
+    Map<String, Object> opts = new HashMap<String, Object>() { {
         put(OPTION_STRING_ENCODING, "UTF-8");
     }};
 
