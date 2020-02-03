@@ -8,8 +8,6 @@ public class HyperscanLibraryDirect {
 
     public static native int hs_scan(Pointer database, String data, int length, int flags, Pointer scratch, HyperscanLibrary.match_event_handler callback, Pointer context);
 
-    public static native int hs_scan(Pointer database, Pointer data, int length, int flags, Pointer scratch, Pointer callback, Pointer context);
-
     static {
         HashMap<String,Object> opts = new HashMap<>();
         opts.put(Library.OPTION_STRING_ENCODING, "UTF-8");
