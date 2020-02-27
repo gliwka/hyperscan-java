@@ -6,8 +6,8 @@ set -o pipefail
 
 THREADS=$(nproc --all)
 
-echo Installing wget, gcc, g++, tar, make
-yum -y install wget gcc gcc-c++ tar, make
+echo Installing wget, gcc, g++, tar, make, yum-utils
+yum -y install wget gcc gcc-c++ tar make yum-utils
 
 echo Compiling and installing ragel
 cd /tmp

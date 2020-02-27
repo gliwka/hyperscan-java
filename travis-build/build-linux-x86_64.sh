@@ -5,7 +5,7 @@ set -eu
 set -o pipefail
 
 echo Compiling inside docker
-docker run -v $TRAVIS_BUILD_DIR/travis-build:/scripts -v $(pwd)/hyperscan:/tmp/hyperscan -it centos:centos7 /bin/bash -ci /scripts/docker-script.sh
+docker run -v $TRAVIS_BUILD_DIR/travis-build:/scripts -v $(pwd)/hyperscan:/tmp/hyperscan -it centos:centos6 /bin/bash -ci /scripts/docker-script.sh
 
 cd hyperscan/build
 echo Replacing library in git repository
