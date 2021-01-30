@@ -1,13 +1,12 @@
 package com.gliwka.hyperscan.wrapper;
 
-import com.gliwka.hyperscan.jna.CompileErrorStruct;
-import com.gliwka.hyperscan.jna.HyperscanLibrary;
-import com.sun.jna.Native;
-import com.sun.jna.Pointer;
-import com.sun.jna.ptr.PointerByReference;
+import com.gliwka.hyperscan.jni.hs_compile_error_t;
+import com.gliwka.hyperscan.jni.hs_expr_info_t;
 
 import java.util.EnumSet;
 import java.util.Objects;
+
+import static com.gliwka.hyperscan.jni.hyperscan.*;
 
 
 /**
@@ -33,6 +32,10 @@ public class Expression {
     public class ValidationResult {
         private String errorMessage;
         private boolean isValid;
+
+        ValidationResult(boolean isValid) {
+            this.isValid = isValid;
+        }
 
         ValidationResult(String errorMessage, boolean isValid) {
             this.errorMessage = errorMessage;
@@ -148,26 +151,18 @@ public class Expression {
 
 
     public ValidationResult validate() {
-        PointerByReference info = new PointerByReference();
-        PointerByReference error = new PointerByReference();
+        try(hs_expr_info_t info = new hs_expr_info_t(); hs_compile_error_t error = new hs_compile_error_t()) {
+            int hsResult = hs_expression_info(this.expression, Util.bitEnumSetToInt(this.flags), info, error);
 
-        int hsResult = HyperscanLibrary.INSTANCE.hs_expression_info(this.expression, Util.bitEnumSetToInt(this.flags), info, error);
+            if(hsResult != 0) {
+                return new ValidationResult(error.message().getString(), false);
 
-        String errorMessage = "";
-        boolean isValid = true;
+            }
+            else {
+                return new ValidationResult(true);
+            }
 
-        if(hsResult != 0) {
-            isValid = false;
-            CompileErrorStruct errorStruct = new CompileErrorStruct(error.getValue());
-            errorMessage = errorStruct.message;
-            errorStruct.setAutoRead(false);
-            HyperscanLibrary.INSTANCE.hs_free_compile_error(errorStruct);
         }
-        else {
-            Native.free(Pointer.nativeValue(info.getPointer()));
-        }
-
-        return new ValidationResult(errorMessage, isValid);
     }
 
     /**

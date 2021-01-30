@@ -18,8 +18,8 @@ class EndToEndTest {
         EnumSet<ExpressionFlag> flags = EnumSet.of(ExpressionFlag.CASELESS, ExpressionFlag.SOM_LEFTMOST);
         Expression expression = new Expression("Te?st", flags);
         Expression.ValidationResult result = expression.validate();
-        assertEquals(result.getIsValid(), true);
-        assertEquals(result.getErrorMessage(), "");
+        assertTrue(result.getIsValid());
+        assertNull(result.getErrorMessage());
         try {
             Database db = roundTrip(Database.compile(expression), serialize);
             assertTrue(db.getSize() > 0);

@@ -1,30 +1,56 @@
 package com.gliwka.hyperscan.wrapper;
 
-import com.sun.jna.*;
-import com.gliwka.hyperscan.jna.*;
-import com.sun.jna.ptr.PointerByReference;
+import com.gliwka.hyperscan.jni.hs_database_t;
+import com.gliwka.hyperscan.jni.hs_scratch_t;
+import com.gliwka.hyperscan.jni.match_event_handler;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.javacpp.SizeTPointer;
+
 import java.io.*;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.gliwka.hyperscan.jni.hyperscan.*;
+import static java.util.Collections.emptyList;
+
 /**
  * Scanner, can be used with databases to scan for expressions in input string
- * In case of multithreaded scanning, you need one scanner instance per thread.
+ * In case of multithreaded scanning, you need one scanner instance per CPU thread.
+ *
+ * Scanner references native resources. It is paramount to close it after use.
+ * There can only be 256 non-closed scanner instances.
  */
 public class Scanner implements Closeable {
-    private PointerByReference scratchReference = new PointerByReference();
-    private Pointer scratch;
+    private static int count = 0;
 
+    public Scanner() {
+        if(count == 256) {
+            throw new RuntimeException("There can only be 256 non-closed Scanner instances. Create them once per thread!");
+        }
+
+        count++;
+    }
+
+
+    private static class NativeScratch extends hs_scratch_t {
+        private NativeScratch() {
+            super();
+            this.deallocator(() -> hs_free_scratch(this));
+        }
+    }
+
+    private NativeScratch scratch = new NativeScratch();
 
     /**
      * Check if the hardware platform is supported
      * @return true if supported, otherwise false
      */
     public static boolean getIsValidPlatform() {
-        return HyperscanLibrary.INSTANCE.hs_valid_platform() == 0;
+        return hs_valid_platform() == 0;
     }
 
 
@@ -33,7 +59,7 @@ public class Scanner implements Closeable {
      * @return version string
      */
     public static String getVersion() {
-        return HyperscanLibrary.INSTANCE.hs_version();
+        return hs_version().getString();
     }
 
     /**
@@ -44,10 +70,11 @@ public class Scanner implements Closeable {
         if(scratch == null) {
             throw new IllegalStateException("Scratch space has alredy been deallocated");
         }
-        
-        SizeTByReference size = new SizeTByReference();
-        HyperscanLibrary.INSTANCE.hs_scratch_size(scratch, size);
-        return size.getValue().longValue();
+
+        try(SizeTPointer size = new SizeTPointer(1)) {
+            hs_scratch_size(scratch, size);
+            return size.get();
+        }
     }
 
     /**
@@ -56,26 +83,22 @@ public class Scanner implements Closeable {
      * @param db Database containing expressions to use for matching
      */
     public void allocScratch(final Database db) {
-        Pointer dbPointer = db.getPointer();
-
-        if(scratchReference == null) {
-            scratchReference = new PointerByReference();
+        if(scratch == null) {
+            throw new IllegalStateException("Scratch space has alredy been deallocated");
         }
 
-        int hsError = HyperscanLibrary.INSTANCE.hs_alloc_scratch(dbPointer, scratchReference);
+        hs_database_t dbPointer = db.getDatabase();
+        int hsError = hs_alloc_scratch(dbPointer, scratch);
 
         if(hsError != 0)
             throw Util.hsErrorIntToException(hsError);
-
-        scratch = scratchReference.getValue();
     }
 
-    private LinkedList<long[]> matchedIds = new LinkedList<>();
-    private List<Match> noMatches = Collections.emptyList();
+    private final LinkedList<long[]> matchedIds = new LinkedList<>();
 
-    private HyperscanLibrary.match_event_handler matchHandler = new HyperscanLibrary.match_event_handler() {
-        public int invoke(int id, long from, long to, int flags, Pointer context) {
-            long[] tuple = { id, from, to };
+    private final match_event_handler matchHandler = new match_event_handler() {
+        public int call(int id, long from, long to, int flags, Pointer context) {
+            long[] tuple = {id, from, to};
             matchedIds.add(tuple);
             return 0;
         }
@@ -89,22 +112,27 @@ public class Scanner implements Closeable {
      * @return List of Matches
      */
     public List<Match> scan(final Database db, final String input) {
-        Pointer dbPointer = db.getPointer();
+        if(scratch == null) {
+            throw new IllegalStateException("Scratch space has already been deallocated");
+        }
 
-        final byte[] utf8bytes = input.getBytes(StandardCharsets.UTF_8);
-        final int bytesLength = utf8bytes.length;
+        hs_database_t database = db.getDatabase();
+
+        final byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
+        final BytePointer utf8bytes = new BytePointer(ByteBuffer.wrap(bytes));
 
         matchedIds.clear();
-        int hsError = HyperscanLibraryDirect.hs_scan(dbPointer, input, bytesLength,
-                0, scratch, matchHandler, Pointer.NULL);
+        int hsError = hs_scan(database, utf8bytes, bytes.length, 0, scratch, matchHandler, null);
 
-        if(hsError != 0)
+        if(hsError != 0) {
             throw Util.hsErrorIntToException(hsError);
+        }
 
-        if(matchedIds.isEmpty())
-            return noMatches;
+        if(matchedIds.isEmpty()) {
+            return emptyList();
+        }
 
-        final int[] byteToIndex = Util.utf8ByteIndexesMapping(input, bytesLength);
+        final int[] byteToIndex = Util.utf8ByteIndexesMapping(input, bytes.length);
         final LinkedList<Match> matches = new LinkedList<Match>();
         matchedIds.forEach( tuple -> {
             int id = (int)tuple[0];
@@ -126,17 +154,10 @@ public class Scanner implements Closeable {
     }
 
     @Override
-    protected void finalize() {
-        //check and setting scratch pointer to null to avoid double free
-        if(scratch != null) {
-            HyperscanLibrary.INSTANCE.hs_free_scratch(scratch);
-            scratch = null;
-            scratchReference = null;
-        }
-    }
-
-    @Override
-    public void close() throws IOException {
-        this.finalize();
+    public void close() {
+        scratch.close();
+        matchHandler.close();
+        count--;
+        scratch = null;
     }
 }
