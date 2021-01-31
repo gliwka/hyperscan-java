@@ -28,6 +28,13 @@ public class Scanner implements Closeable {
     private static int count = 0;
 
     public Scanner() {
+        // The function pointer for the callback match_event_handler allocates native resources.
+        // javacpp limits the number of function pointer instances to 10.
+        // The limit has been increased to 256 to match the thread count in modern server CPUs
+        // An alternative would be to have a single callback and to use the context pointer to identify
+        // the right scanner. I've decided against it to keep this implementation simple and to not have
+        // to manage references between context pointers and scanner instances
+
         if(count == 256) {
             throw new RuntimeException("There can only be 256 non-closed Scanner instances. Create them once per thread!");
         }
