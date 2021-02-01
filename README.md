@@ -1,8 +1,6 @@
 # hyperscan-java
 [![Maven Central](https://img.shields.io/maven-central/v/com.gliwka.hyperscan/hyperscan.svg?label=Maven%20Central)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.gliwka.hyperscan%22%20a%3A%22hyperscan%22)
-[![Build Status](https://travis-ci.org/gliwka/hyperscan-java.svg?branch=master)](https://travis-ci.org/gliwka/hyperscan-java)
-[![codecov](https://codecov.io/gh/gliwka/hyperscan-java/branch/develop/graph/badge.svg)](https://codecov.io/gh/gliwka/hyperscan-java)
-[![Code Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=com.gliwka.hyperscan%3Ahyperscan&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.gliwka.hyperscan%3Ahyperscan)
+![example workflow name](https://github.com/gliwka/hyperscan-java/workflows/Java%20CI/badge.svg)
 
 
 
@@ -49,7 +47,7 @@ LinkedList<Expression> expressions = new LinkedList<Expression>();
 //make sure you read the original hyperscan documentation to learn more about flags
 //or browse the ExpressionFlag.java in this repo.
 expressions.add(new Expression("[0-9]{5}", EnumSet.of(ExpressionFlag.SOM_LEFTMOST)));
-expressions.add(new Expression("Test", EnumSet.of(ExpressionFlag.CASELESS)));
+expressions.add(new Expression("Test", ExpressionFlag.CASELESS));
 
 
 //we precompile the expression into a database.
@@ -101,46 +99,19 @@ catch(IOException ie) {
 
 ## Limitations of hyperscan-java
 
-It currently works on OS X and Linux, only! We currently only ship precompiled binaries for 64-bit (x86_64).
-
 hyperscan only supports a subset of regular expressions. Notable exceptions are for example backreferences and capture groups. Please read the [hyperscan developer reference](https://intel.github.io/hyperscan/dev-reference/) so you get a good unterstanding how hyperscan works and what the limitations are.
 
-hyperscan will only run on x86 processors in 64-bit and 32-bit modes and takes advantage of special instruction sets, when available. Check the original [project documentation](https://intel.github.io/hyperscan/dev-reference/getting_started.html#hardware) to learn more.
+## Native libraries
+This wrapper ships with pre-compiled hyperscan binaries for windows, linux (glibc >=2.12) and osx for x86_64 CPUs.
+You can find the repository with the native libraries [here](https://github.com/gliwka/hyperscan-java-native)
 
-## Dependencies
-This wrapper only on the hyperscan shared library for it's functionality. It already contains precompiled 64-bit shared libraries for macOS and 64-bit libraries for most glibc (>=2.17) based Linux distributions.
-
-#### Compile yourself
-In case the precompiled binaries don't suite your usecase or architecture, you got to 
-make sure you've got hyperscan compiled as a shared library on your system. On Linux and macOS a ```mkdir build && cd build && cmake -DBUILD_SHARED_LIBS=YES .. && make``` inside the git repositiory was enough. For more information about how to compile hyperscan visit the [project documentation](https://intel.github.io/hyperscan/dev-reference/).
-
-Make sure you specify the system property ```jna.library.path``` using code or the command line to point to a location which includes the hyperscan shared libraries.
-
-
-## Javadoc
-
+## Documentation
+The [hyperscan developer reference](https://intel.github.io/hyperscan/dev-reference/) explains hyperscan.
 The javadoc is located [here](https://gliwka.github.io/hyperscan-java/).
-
-
-
-## Included packages
-```com.gliwka.hyperscan.wrapper``` provides a java-style wrapper arround hyperscan.
-```com.gliwka.hyperscan.jna``` implements the JNA interface and primitives used to call the hyperscan c library.
-
-If you just want to use hyperscan in java, you only need to import ```com.gliwka.hyperscan.wrapper```.
-
-
-## Currently not implemented
- * Extended expression syntax using [hs_compile_ext_multi()](http://intel.github.io/hyperscan/dev-reference/api_files.html#project0hs__compile_8h_1aacc508bea3042f1faba32c3818bfc2a3)
 
 
 ## Contributing
  Feel free to raise issues or submit a pull request.
-
-
-## Version control
- This project follows the [git flow](https://github.com/kashike/flow-nbt/blob/master/README.md) branching model.
- All development happens on feature branches. ```develop``` is the integration branch. The ```master``` branch only contains production-ready code. All releases are tagged.
 
 ## Credits
 Shoutout to [@eliaslevy](https://github.com/eliaslevy), [@krzysztofzienkiewicz](https://github.com/krzysztofzienkiewicz) and [@swapnilnawale](https://github.com/swapnilnawale) for all the great contributions.
