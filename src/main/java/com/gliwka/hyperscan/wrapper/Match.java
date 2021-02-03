@@ -9,7 +9,7 @@ public class Match {
     private String matchedString;
     private Expression matchedExpression;
 
-    Match(long start, long end, String match, Expression expression) {
+    public Match(long start, long end, String match, Expression expression) {
         startPosition = start;
         endPosition = end;
         matchedString = match;
