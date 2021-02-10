@@ -13,6 +13,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
 
 import static com.gliwka.hyperscan.jni.hyperscan.*;
 import static java.util.Collections.emptyList;
@@ -126,10 +127,10 @@ public class Scanner implements Closeable {
         hs_database_t database = db.getDatabase();
 
         final byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
-        final BytePointer utf8bytes = new BytePointer(ByteBuffer.wrap(bytes));
+        final BytePointer bytePointer = new BytePointer(ByteBuffer.wrap(bytes));
 
         matchedIds.clear();
-        int hsError = hs_scan(database, utf8bytes, bytes.length, 0, scratch, matchHandler, null);
+        int hsError = hs_scan(database, bytePointer, bytes.length, 0, scratch, matchHandler, null);
 
         if(hsError != 0) {
             throw Util.hsErrorIntToException(hsError);
@@ -139,23 +140,35 @@ public class Scanner implements Closeable {
             return emptyList();
         }
 
-        final int[] byteToIndex = Util.utf8ByteIndexesMapping(input, bytes.length);
-        final LinkedList<Match> matches = new LinkedList<Match>();
+        //if string length == byte length, all characters are 1 byte wide -> ASCII, no position mapping necessary
+        if(bytes.length == input.length()) {
+            return processMatches(input, bytes, db, position -> position);
+        }
+        else {
+            final int[] byteToStringPosition = Utf8.byteToStringPositionMap(input, bytes.length);
+            return processMatches(input, bytes, db, bytePosition -> byteToStringPosition[bytePosition]);
+        }
+    }
+
+    private List<Match> processMatches(String input, byte[] bytes, Database db, Function<Integer, Integer> position) {
+        final LinkedList<Match> matches = new LinkedList<>();
+
         matchedIds.forEach( tuple -> {
             int id = (int)tuple[0];
             long from = tuple[1];
-            long to = tuple[2] < 1 ? 1 : tuple[2]; //prevent index out of bound exception later
+            long to = tuple[2] < 1 ? 1 : tuple[2];
             String match = "";
             Expression matchingExpression = db.getExpression(id);
 
+            int startIndex = position.apply((int)from);
+            int endIndex = position.apply((int)to - 1);
+
             if(matchingExpression.getFlags().contains(ExpressionFlag.SOM_LEFTMOST)) {
-                int startIndex = byteToIndex[(int)from];
-                int endIndex = byteToIndex[(int)to - 1];
                 match = input.substring(startIndex, endIndex + 1);
             }
 
-            if (byteToIndex.length > 0) {
-                matches.add(new Match(byteToIndex[(int) from], byteToIndex[(int) to - 1], match, matchingExpression));
+            if (bytes.length > 0) {
+                matches.add(new Match(startIndex, endIndex, match, matchingExpression));
             } else {
                 matches.add(new Match(0, 0, match, matchingExpression));
             }
