@@ -13,7 +13,6 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static com.gliwka.hyperscan.jni.hyperscan.*;
-import static com.gliwka.hyperscan.wrapper.Util.bitEnumSetToInt;
 import static java.util.Collections.singletonList;
 import static java.util.function.Function.identity;
 
@@ -80,7 +79,7 @@ public class Database implements Closeable {
 
 
         for (int i = 0; i < expressionsSize; i++) {
-            flags[i] = bitEnumSetToInt(expressions.get(i).getFlags());
+            flags[i] = expressions.get(i).getFlagBits();
             ids[i] = i;
         }
 

@@ -152,7 +152,7 @@ public class Expression {
 
     public ValidationResult validate() {
         try(hs_expr_info_t info = new hs_expr_info_t(); hs_compile_error_t error = new hs_compile_error_t()) {
-            int hsResult = hs_expression_info(this.expression, Util.bitEnumSetToInt(this.flags), info, error);
+            int hsResult = hs_expression_info(this.expression, getFlagBits(), info, error);
 
             if(hsResult != 0) {
                 return new ValidationResult(error.message().getString(), false);
@@ -172,6 +172,16 @@ public class Expression {
     public EnumSet<ExpressionFlag> getFlags()
     {
         return flags;
+    }
+
+    int getFlagBits() {
+        int bitValue = 0;
+
+        for(BitFlag flag : flags) {
+            bitValue = flag.getBits() | bitValue;
+        }
+
+        return bitValue;
     }
 
     /**
