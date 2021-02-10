@@ -20,8 +20,6 @@ import static java.util.function.Function.identity;
  * Database containing compiled expressions ready for scanning using the Scanner
  */
 public class Database implements Closeable {
-    private static final int HS_MODE_BLOCK = 1;
-    private static final int HS_COMPILE_ERROR = -4;
     private final List<Expression> expressions;
     private NativeDatabase database;
 
@@ -43,11 +41,11 @@ public class Database implements Closeable {
             return;
         }
 
-        if (hsError == HS_COMPILE_ERROR) {
+        if (hsError == HS_COMPILER_ERROR) {
             Expression expression = compileError.expression() < 0 ? null : expressions.get(compileError.expression());
             throw new CompileErrorException(compileError.message().getString(), expression);
         } else {
-            throw Util.hsErrorIntToException(hsError);
+            throw HyperscanException.hsErrorToException(hsError);
         }
     }
 
@@ -175,7 +173,7 @@ public class Database implements Closeable {
             int hsError = hs_serialize_database(database, bytePointer, size);
 
             if (hsError != 0) {
-                throw Util.hsErrorIntToException(hsError);
+                throw HyperscanException.hsErrorToException(hsError);
             }
 
             int length = (int) size.get();
@@ -264,7 +262,7 @@ public class Database implements Closeable {
 
         int hsError = hs_deserialize_database(bytePointer, length, database);
         if (hsError != 0) {
-            throw Util.hsErrorIntToException(hsError);
+            throw HyperscanException.hsErrorToException(hsError);
         }
 
         return new Database(database, expressions);

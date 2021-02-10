@@ -36,7 +36,7 @@ public class Scanner implements Closeable {
         // the right scanner. I've decided against it to keep this implementation simple and to not have
         // to manage references between context pointers and scanner instances
 
-        if(count == 256) {
+        if(count >= 256) {
             throw new RuntimeException("There can only be 256 non-closed Scanner instances. Create them once per thread!");
         }
 
@@ -92,14 +92,15 @@ public class Scanner implements Closeable {
      */
     public void allocScratch(final Database db) {
         if(scratch == null) {
-            throw new IllegalStateException("Scratch space has alredy been deallocated");
+            throw new IllegalStateException("Scratch space has already been deallocated");
         }
 
         hs_database_t dbPointer = db.getDatabase();
         int hsError = hs_alloc_scratch(dbPointer, scratch);
 
-        if(hsError != 0)
-            throw Util.hsErrorIntToException(hsError);
+        if(hsError != 0) {
+            throw HyperscanException.hsErrorToException(hsError);
+        }
     }
 
     private final LinkedList<long[]> matchedIds = new LinkedList<>();
@@ -133,7 +134,7 @@ public class Scanner implements Closeable {
         int hsError = hs_scan(database, bytePointer, bytes.length, 0, scratch, matchHandler, null);
 
         if(hsError != 0) {
-            throw Util.hsErrorIntToException(hsError);
+            throw HyperscanException.hsErrorToException(hsError);
         }
 
         if(matchedIds.isEmpty()) {
