@@ -18,7 +18,7 @@ class IntegrationTest {
         EnumSet<ExpressionFlag> flags = EnumSet.of(ExpressionFlag.CASELESS, ExpressionFlag.SOM_LEFTMOST);
         Expression expression = new Expression("Te?st", flags);
         Expression.ValidationResult result = expression.validate();
-        assertTrue(result.getIsValid());
+        assertTrue(result.isValid());
         assertNull(result.getErrorMessage());
         try {
             Database db = roundTrip(Database.compile(expression), serialize);
@@ -39,7 +39,7 @@ class IntegrationTest {
 
         Expression invalidExpression = new Expression("test\\1", EnumSet.noneOf(ExpressionFlag.class));
         Expression.ValidationResult invalidResult = invalidExpression.validate();
-        assertFalse(invalidResult.getIsValid());
+        assertFalse(invalidResult.isValid());
         assertTrue(invalidResult.getErrorMessage().length() > 0);
 
         try {
@@ -83,6 +83,20 @@ class IntegrationTest {
         }
         catch(Exception e) {
             //expected
+        }
+    }
+
+    @TestWithDatabaseRoundtrip
+    void expressionWithId(SerializeDatabase serialize) {
+        try {
+            Database db = roundTrip(Database.compile(Expression.builder().expression("test").id(17).build()), serialize);
+            Scanner scanner = new Scanner();
+            scanner.allocScratch(db);
+            List<Match> matches = scanner.scan(db, "12345 test string");
+            assertEquals(17, matches.get(0).getMatchedExpression().getId());
+        }
+        catch(Exception e) {
+            fail(e);
         }
     }
 
@@ -317,11 +331,7 @@ class IntegrationTest {
 
         Database deserialized = Database.load(new ByteArrayInputStream(baos.toByteArray()));
 
-        assertEquals(db.getExpressionCount(), deserialized.getExpressionCount(), "Deserialized database must have equal expression count");
-        for (int i = 0; i < db.getExpressionCount(); i++) {
-            assertEquals(db.getExpression(i).getExpression(), deserialized.getExpression(i).getExpression(), "Expression at index " + i + " must have the same pattern");
-            assertEquals(db.getExpression(i).getFlags(), deserialized.getExpression(i).getFlags(), "Expression at index " + i + " must have the same flags");
-        }
+        assertEquals(db, deserialized, "Deserialized database must be equal");
 
         return deserialized;
     }
