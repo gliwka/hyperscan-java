@@ -235,31 +235,16 @@ public class Database implements Closeable {
         return load(in, in);
     }
 
-    /**
-     * Loads the database saved via {@link #save(OutputStream, OutputStream)}.
-     * The saved payload contains platform-specific formatting so it should be loaded on a compatible platform.
-     * All Expression contexts will be null.
-     *
-     * @param expressionsIn stream to read expressions from
-     * @param databaseIn    stream to read database from
-     * @return loaded Database
-     */
-    public static Database load(InputStream expressionsIn, InputStream databaseIn) throws IOException {
-        return load(expressionsIn, databaseIn, (pattern, flags) -> null);
-    }
 
     /**
      * Loads the database saved via {@link #save(OutputStream, OutputStream)}.
      * The saved payload contains platform-specific formatting so it should be loaded on a compatible platform.
-     * Expression contexts will be recreated using the provided contextCreator.
      *
      * @param expressionsIn  stream to read expressions from
      * @param databaseIn     stream to read database from
-     * @param contextCreator callback responsible for creating an Expression's context given its pattern and flags
      * @return loaded Database
      */
-    public static Database load(InputStream expressionsIn, InputStream databaseIn,
-                                BiFunction<String, EnumSet<ExpressionFlag>, Object> contextCreator) throws IOException {
+    public static Database load(InputStream expressionsIn, InputStream databaseIn) throws IOException {
         // DataInputStream doesn't buffer so it will only read as much as we ask for.
         // This makes it safe to use even if expressionsIn and databaseIn are the same streams.
         DataInputStream expressionsDataIn = new DataInputStream(expressionsIn);
@@ -280,7 +265,7 @@ public class Database implements Closeable {
                 flags.add(bitmaskToFlag.get(bitmask));
 
             }
-            expressions.add(new Expression(pattern, flags, contextCreator.apply(pattern, flags), id == -1 ? null : id));
+            expressions.add(new Expression(pattern, flags, id == -1 ? null : id));
         }
 
         DataInputStream databaseDataIn = new DataInputStream(databaseIn);

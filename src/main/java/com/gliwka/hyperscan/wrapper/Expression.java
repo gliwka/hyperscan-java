@@ -12,14 +12,11 @@ import static com.gliwka.hyperscan.jni.hyperscan.*;
 /**
  * Expression to be compiled as a Database and then be used for scanning using the Scanner
  */
-@Builder
 @EqualsAndHashCode
 @ToString
-@AllArgsConstructor
 public class Expression {
-    @Getter @NonNull private String expression;
-    @Getter @NonNull @Builder.Default private EnumSet<ExpressionFlag> flags = EnumSet.of(ExpressionFlag.NO_FLAG);
-    @Getter private Object context;
+    @Getter @NonNull private final String expression;
+    @Getter private EnumSet<ExpressionFlag> flags = EnumSet.of(ExpressionFlag.NO_FLAG);
     @Getter private Integer id;
 
     /**
@@ -43,9 +40,9 @@ public class Expression {
         this.expression = expression;
     }
 
-    public Expression(@NonNull String expression, Object context) {
+    public Expression(@NonNull String expression, Integer id) {
         this.expression = expression;
-        this.context = context;
+        this.id = id;
     }
 
     public Expression(@NonNull String expression, @NonNull EnumSet<ExpressionFlag> flags) {
@@ -58,16 +55,16 @@ public class Expression {
         this.flags = EnumSet.of(flag);
     }
 
-    public Expression(@NonNull String expression, @NonNull EnumSet<ExpressionFlag> flags, Object context) {
+    public Expression(@NonNull String expression, @NonNull EnumSet<ExpressionFlag> flags, Integer id) {
         this.expression = expression;
         this.flags = flags;
-        this.context = context;
+        this.id = id;
     }
 
-    public Expression(@NonNull String expression, @NonNull ExpressionFlag flag, Object context) {
+    public Expression(@NonNull String expression, @NonNull ExpressionFlag flag, Integer id) {
         this.expression = expression;
         this.flags = EnumSet.of(flag);
-        this.context = context;
+        this.id = id;
     }
 
     public ValidationResult validate() {

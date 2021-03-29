@@ -89,7 +89,7 @@ class IntegrationTest {
     @TestWithDatabaseRoundtrip
     void expressionWithId(SerializeDatabase serialize) {
         try {
-            Database db = roundTrip(Database.compile(Expression.builder().expression("test").id(17).build()), serialize);
+            Database db = roundTrip(Database.compile(new Expression("test", 17)), serialize);
             Scanner scanner = new Scanner();
             scanner.allocScratch(db);
             List<Match> matches = scanner.scan(db, "12345 test string");
