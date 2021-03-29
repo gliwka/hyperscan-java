@@ -20,9 +20,10 @@ import static java.util.function.Function.identity;
  * Database containing compiled expressions ready for scanning using the Scanner
  */
 public class Database implements Closeable {
-    private final List<Expression> expressions;
-    private NativeDatabase database;
+    private final Expression[] expressions;
+    private final int expressionCount;
 
+    private NativeDatabase database;
 
     private static class NativeDatabase extends hs_database_t {
         private NativeDatabase() {
@@ -33,7 +34,19 @@ public class Database implements Closeable {
 
     private Database(NativeDatabase database, List<Expression> expressions) {
         this.database = database;
-        this.expressions = expressions;
+        this.expressionCount = expressions.size();
+
+        boolean hasIds = expressions.get(0).getId() != null;
+
+        if(hasIds) {
+            int maxId = expressions.stream().mapToInt(Expression::getId).max().getAsInt();
+            this.expressions = new Expression[maxId + 1];
+
+            expressions.forEach(expression -> this.expressions[expression.getId()] = expression);
+        }
+        else {
+            this.expressions = expressions.toArray(new Expression[0]);
+        }
     }
 
     private static void handleErrors(int hsError, hs_compile_error_t compileError, List<Expression> expressions) throws CompileErrorException {
@@ -75,10 +88,23 @@ public class Database implements Closeable {
         int[] flags = new int[expressionsSize];
         int[] ids = new int[expressionsSize];
 
+        boolean expressionWithoutId = expressions.stream().anyMatch(expression -> expression.getId() == null);
+        boolean expressionWithId = expressions.stream().anyMatch(expression -> expression.getId() != null);
+
+        if(expressionWithId && expressionWithoutId) {
+            throw new IllegalStateException("You can't mix expressions with and without id's in a single database");
+        }
+
 
         for (int i = 0; i < expressionsSize; i++) {
             flags[i] = expressions.get(i).getFlagBits();
-            ids[i] = i;
+
+            if(expressionWithId) {
+                ids[i] = expressions.get(i).getId();
+            }
+            else {
+                ids[i] = i;
+            }
         }
 
         IntPointer nativeFlags = new IntPointer(flags);
@@ -117,11 +143,11 @@ public class Database implements Closeable {
     }
 
     Expression getExpression(int id) {
-        return expressions.get(id);
+        return expressions[id];
     }
 
     int getExpressionCount() {
-        return expressions.size();
+        return expressionCount;
     }
 
     @Override
@@ -154,8 +180,14 @@ public class Database implements Closeable {
     public void save(OutputStream expressionsOut, OutputStream databaseOut) throws IOException {
         DataOutputStream expressionsDataOut = new DataOutputStream(expressionsOut);
         // How many expressions will be present. We need this to know when to stop reading.
-        expressionsDataOut.writeInt(expressions.size());
+        expressionsDataOut.writeInt(expressionCount);
         for (Expression expression : expressions) {
+            if(expression == null) {
+                continue;
+            }
+
+            // Expression id
+            expressionsDataOut.writeInt(expression.getId() == null ? -1 : expression.getId());
             // Expression pattern
             expressionsDataOut.writeUTF(expression.getExpression());
             // Flag count
@@ -203,31 +235,16 @@ public class Database implements Closeable {
         return load(in, in);
     }
 
-    /**
-     * Loads the database saved via {@link #save(OutputStream, OutputStream)}.
-     * The saved payload contains platform-specific formatting so it should be loaded on a compatible platform.
-     * All Expression contexts will be null.
-     *
-     * @param expressionsIn stream to read expressions from
-     * @param databaseIn    stream to read database from
-     * @return loaded Database
-     */
-    public static Database load(InputStream expressionsIn, InputStream databaseIn) throws IOException {
-        return load(expressionsIn, databaseIn, (pattern, flags) -> null);
-    }
 
     /**
      * Loads the database saved via {@link #save(OutputStream, OutputStream)}.
      * The saved payload contains platform-specific formatting so it should be loaded on a compatible platform.
-     * Expression contexts will be recreated using the provided contextCreator.
      *
      * @param expressionsIn  stream to read expressions from
      * @param databaseIn     stream to read database from
-     * @param contextCreator callback responsible for creating an Expression's context given its pattern and flags
      * @return loaded Database
      */
-    public static Database load(InputStream expressionsIn, InputStream databaseIn,
-                                BiFunction<String, EnumSet<ExpressionFlag>, Object> contextCreator) throws IOException {
+    public static Database load(InputStream expressionsIn, InputStream databaseIn) throws IOException {
         // DataInputStream doesn't buffer so it will only read as much as we ask for.
         // This makes it safe to use even if expressionsIn and databaseIn are the same streams.
         DataInputStream expressionsDataIn = new DataInputStream(expressionsIn);
@@ -239,6 +256,7 @@ public class Database implements Closeable {
                 .collect(Collectors.toMap(ExpressionFlag::getBits, identity()));
 
         for (int i = 0; i < expressionCount; i++) {
+            int id = expressionsDataIn.readInt();
             String pattern = expressionsDataIn.readUTF();
             int flagCount = expressionsDataIn.readInt();
             EnumSet<ExpressionFlag> flags = EnumSet.noneOf(ExpressionFlag.class);
@@ -247,7 +265,7 @@ public class Database implements Closeable {
                 flags.add(bitmaskToFlag.get(bitmask));
 
             }
-            expressions.add(new Expression(pattern, flags, contextCreator.apply(pattern, flags)));
+            expressions.add(new Expression(pattern, flags, id == -1 ? null : id));
         }
 
         DataInputStream databaseDataIn = new DataInputStream(databaseIn);
@@ -266,5 +284,20 @@ public class Database implements Closeable {
         }
 
         return new Database(database, expressions);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Database database = (Database) o;
+        return expressionCount == database.expressionCount && Arrays.deepEquals(expressions, database.expressions);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(expressionCount);
+        result = 31 * result + Arrays.hashCode(expressions);
+        return result;
     }
 }
