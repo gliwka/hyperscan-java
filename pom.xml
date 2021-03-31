@@ -5,10 +5,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.gliwka.hyperscan</groupId>
   <artifactId>hyperscan</artifactId>
-  <version>5.4.0-2.0.0-SNAPSHOT</version>
+  <version>5.4.0-2.0.0</version>
   <name>hyperscan-java</name>
   <description>Java bindings for the high-performance multiple regular expression library hyperscan</description>
-  <url>https://github.com/LocateTech/hyperscan-java</url>
+  <url>https://github.com/gliwka/hyperscan-java</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -21,9 +21,7 @@
   <developers>
     <developer>
       <name>Matthias Gliwka</name>
-      <email>mg@locatetech.io</email>
-      <organization>LocateTech</organization>
-      <organizationUrl>https://locatetech.io</organizationUrl>
+      <email>matthias@gliwka.eu</email>
     </developer>
     <developer>
       <name>Elias Levy</name>
@@ -31,10 +29,10 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:git://github.com/LocateTech/hyperscan-java.git</connection>
-    <developerConnection>scm:git:ssh://github.com:LocateTech/hyperscan-java.git
+    <connection>scm:git:git://github.com/gliwka/hyperscan-java.git</connection>
+    <developerConnection>scm:git:ssh://github.com:gliwka/hyperscan-java.git
     </developerConnection>
-    <url>https://github.com/LocateTech/hyperscan-java</url>
+    <url>https://github.com/gliwka/hyperscan-java</url>
   </scm>
   <distributionManagement>
     <snapshotRepository>

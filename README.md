@@ -11,26 +11,30 @@ It uses hybrid automata techniques to allow simultaneous matching of large numbe
 This project is a third-party developed wrapper for the [hyperscan](https://github.com/intel/hyperscan) project to enable developers to integrate hyperscan in their java (JVM) based projects.
 
 ## Add it to your project
-This project is available on maven central.
+This project is available on maven central. 
+
+The version number consists of two parts (i.e. 5.4.0-2.0.0).
+The first part specifies the hyperscan version (5.4.0), the second part the version of the wrapper
+(2.0.0)
 
 #### Maven
 ```xml
 <dependency>
     <groupId>com.gliwka.hyperscan</groupId>
     <artifactId>hyperscan</artifactId>
-    <version>1.0.0</version>
+    <version>5.4.0-2.0.0</version>
 </dependency>
 ```
 
 #### Gradle
 
 ```gradle
-compile group: 'com.gliwka.hyperscan', name: 'hyperscan', version: '1.0.0'
+compile group: 'com.gliwka.hyperscan', name: 'hyperscan', version: '5.4.0-2.0.0'
 ```
 
 #### sbt
 ```sbt
-libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "1.0.0"
+libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "5.4.0-2.0.0"
 ```
 
 ## Usage
@@ -143,6 +147,8 @@ You can find the repository with the native libraries [here](https://github.com/
 The [hyperscan developer reference](https://intel.github.io/hyperscan/dev-reference/) explains hyperscan.
 The javadoc is located [here](https://gliwka.github.io/hyperscan-java/).
 
+## Changelog
+[See here](CHANGELOG.md).
 
 ## Contributing
  Feel free to raise issues or submit a pull request.
