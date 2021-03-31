@@ -8,8 +8,7 @@
 
 It uses hybrid automata techniques to allow simultaneous matching of large numbers (up to tens of thousands) of regular expressions and for the matching of regular expressions across streams of data.
 
-
-This project is a third-party developed JNA based java wrapper for the [hyperscan](https://github.com/intel/hyperscan) project to enable developers to integrate hyperscan in their java (JVM) based projects.
+This project is a third-party developed wrapper for the [hyperscan](https://github.com/intel/hyperscan) project to enable developers to integrate hyperscan in their java (JVM) based projects.
 
 ## Add it to your project
 This project is available on maven central.
@@ -34,7 +33,46 @@ compile group: 'com.gliwka.hyperscan', name: 'hyperscan', version: '1.0.0'
 libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "1.0.0"
 ```
 
-## Simple example
+## Usage
+If you want to utilize the whole power of the Java Regex API / full PCRE syntax
+and are fine with sacrificing some performance, use the```PatternFilter```.
+It takes a large lists of ```java.util.regex.Pattern``` and uses hyperscan
+to filter it down to a few Patterns with a high probability that they will match.
+You can then use the regular Java API to confirm those matches. This is similar to
+chimera, only using the standard Java API instead of libpcre.
+
+If you need the highest performance, you should use the hyperscan API directly.
+Be aware, that only a smaller subset of the PCRE syntax is supported.
+Missing features are for example backreferences, capture groups and backtracking verbs.
+The matching behaviour is also a litte bit different, see [the semantics chapter](https://intel.github.io/hyperscan/dev-reference/compilation.html#semantics) of the hyperscan docs.
+
+## Examples
+
+### Use of the PatternFilter
+```java
+List<Pattern> patterns = asList(
+        Pattern.compile("The number is ([0-9]+)", Pattern.CASE_INSENSITIVE),
+        Pattern.compile("The color is (blue|red|orange)")
+        // and thousands more
+);
+
+//not thread-safe, create per thread
+PatternFilter filter = new PatternFilter(patterns);
+
+//this list now only contains the probably matching patterns, in this case the first one
+List<Matcher> matchers = filter.filter("The number is 7 the NUMber is 27");
+
+//now we use the regular java regex api to check for matches - this is not hyperscan specific
+for(Matcher matcher : matchers) {
+    while (matcher.find()) {
+        // will print 7 and 27
+        System.out.println(matcher.group(1));
+    }
+}
+```
+
+
+### Direct use of hyperscan
 ```java
 import com.gliwka.hyperscan.wrapper;
 
@@ -96,10 +134,6 @@ catch(IOException ie) {
 }
 ```
 
-
-## Limitations of hyperscan-java
-
-hyperscan only supports a subset of regular expressions. Notable exceptions are for example backreferences and capture groups. Please read the [hyperscan developer reference](https://intel.github.io/hyperscan/dev-reference/) so you get a good unterstanding how hyperscan works and what the limitations are.
 
 ## Native libraries
 This wrapper ships with pre-compiled hyperscan binaries for windows, linux (glibc >=2.12) and osx for x86_64 CPUs.
