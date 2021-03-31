@@ -9,7 +9,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static com.gliwka.hyperscan.jni.hyperscan.*;
@@ -38,13 +37,12 @@ public class Database implements Closeable {
 
         boolean hasIds = expressions.get(0).getId() != null;
 
-        if(hasIds) {
+        if (hasIds) {
             int maxId = expressions.stream().mapToInt(Expression::getId).max().getAsInt();
             this.expressions = new Expression[maxId + 1];
 
             expressions.forEach(expression -> this.expressions[expression.getId()] = expression);
-        }
-        else {
+        } else {
             this.expressions = expressions.toArray(new Expression[0]);
         }
     }
@@ -69,7 +67,7 @@ public class Database implements Closeable {
      * @return Compiled database
      */
     public static Database compile(Expression expression) throws CompileErrorException {
-       return compile(singletonList(expression));
+        return compile(singletonList(expression));
     }
 
     /**
@@ -91,7 +89,7 @@ public class Database implements Closeable {
         boolean expressionWithoutId = expressions.stream().anyMatch(expression -> expression.getId() == null);
         boolean expressionWithId = expressions.stream().anyMatch(expression -> expression.getId() != null);
 
-        if(expressionWithId && expressionWithoutId) {
+        if (expressionWithId && expressionWithoutId) {
             throw new IllegalStateException("You can't mix expressions with and without id's in a single database");
         }
 
@@ -99,10 +97,9 @@ public class Database implements Closeable {
         for (int i = 0; i < expressionsSize; i++) {
             flags[i] = expressions.get(i).getFlagBits();
 
-            if(expressionWithId) {
+            if (expressionWithId) {
                 ids[i] = expressions.get(i).getId();
-            }
-            else {
+            } else {
                 ids[i] = i;
             }
         }
@@ -151,7 +148,7 @@ public class Database implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         database.close();
         database = null;
     }
@@ -182,7 +179,7 @@ public class Database implements Closeable {
         // How many expressions will be present. We need this to know when to stop reading.
         expressionsDataOut.writeInt(expressionCount);
         for (Expression expression : expressions) {
-            if(expression == null) {
+            if (expression == null) {
                 continue;
             }
 
@@ -240,8 +237,8 @@ public class Database implements Closeable {
      * Loads the database saved via {@link #save(OutputStream, OutputStream)}.
      * The saved payload contains platform-specific formatting so it should be loaded on a compatible platform.
      *
-     * @param expressionsIn  stream to read expressions from
-     * @param databaseIn     stream to read database from
+     * @param expressionsIn stream to read expressions from
+     * @param databaseIn    stream to read database from
      * @return loaded Database
      */
     public static Database load(InputStream expressionsIn, InputStream databaseIn) throws IOException {
