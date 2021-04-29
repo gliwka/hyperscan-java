@@ -1,0 +1,60 @@
+version: 2
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "04:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: org.openjdk.jmh:jmh-core
+    versions:
+    - "> 1.19"
+  - dependency-name: com.gliwka.hyperscan:native
+    versions:
+    - 5.4.0-1.0.0
+  - dependency-name: com.gliwka.hyperscan:native:linux-x86_64
+    versions:
+    - 5.4.0-1.0.0
+  - dependency-name: org.bytedeco:javacpp
+    versions:
+    - 1.5.5
+  - dependency-name: com.gliwka.hyperscan:native:macosx-x86_64
+    versions:
+    - 5.4.0-1.0.0
+  - dependency-name: com.gliwka.hyperscan:native:windows-x86_64
+    versions:
+    - 5.4.0-1.0.0
+  - dependency-name: org.bytedeco:javacpp-platform
+    versions:
+    - 1.5.5
+  - dependency-name: org.openjdk.jmh:jmh-generator-annprocess
+    versions:
+    - "1.28"
+  - dependency-name: org.apache.maven.plugins:maven-source-plugin
+    versions:
+    - 3.2.1
+  - dependency-name: org.jacoco:jacoco-maven-plugin
+    versions:
+    - 0.8.6
+  - dependency-name: org.junit.jupiter:junit-jupiter-params
+    versions:
+    - 5.7.0
+  - dependency-name: org.codehaus.mojo:versions-maven-plugin
+    versions:
+    - 2.8.1
+  - dependency-name: org.apache.maven.plugins:maven-javadoc-plugin
+    versions:
+    - 3.2.0
+  - dependency-name: org.junit.jupiter:junit-jupiter-engine
+    versions:
+    - 5.7.0
+  - dependency-name: org.apache.maven.plugins:maven-scm-publish-plugin
+    versions:
+    - 3.1.0
+  - dependency-name: org.junit.jupiter:junit-jupiter-api
+    versions:
+    - 5.7.0
+  - dependency-name: net.java.dev.jna:jna
+    versions:
+    - 5.6.0
