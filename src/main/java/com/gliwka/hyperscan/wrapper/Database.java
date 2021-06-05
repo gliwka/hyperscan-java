@@ -93,8 +93,6 @@ public class Database implements Closeable {
             throw new IllegalStateException("You can't mix expressions with and without id's in a single database");
         }
 
-
-        for (int i = 0; i < expressionsSize; i++) {
         int i = 0;
         final Iterator<Expression> expressionIterator = expressions.iterator();
         while (expressionIterator.hasNext()) {
