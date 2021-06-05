@@ -95,13 +95,18 @@ public class Database implements Closeable {
 
 
         for (int i = 0; i < expressionsSize; i++) {
-            flags[i] = expressions.get(i).getFlagBits();
+        int i = 0;
+        final Iterator<Expression> expressionIterator = expressions.iterator();
+        while (expressionIterator.hasNext()) {
+        	final Expression expression = expressionIterator.next();
+        	flags[i] = expression.getFlagBits();
 
             if (expressionWithId) {
-                ids[i] = expressions.get(i).getId();
+                ids[i] = expression.getId();
             } else {
                 ids[i] = i;
             }
+        	i++;
         }
 
         IntPointer nativeFlags = new IntPointer(flags);
