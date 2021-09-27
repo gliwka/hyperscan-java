@@ -37,9 +37,11 @@ public class Scanner implements Closeable {
         // the right scanner. I've decided against it to keep this implementation simple and to not have
         // to manage references between context pointers and scanner instances
 
-        if(count.incrementAndGet() >= 256) {
+        if(count.get() >= 256) {
             throw new RuntimeException("There can only be 256 non-closed Scanner instances. Create them once per thread!");
         }
+
+        count.incrementAndGet();
     }
 
 
