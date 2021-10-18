@@ -2,7 +2,10 @@ package com.gliwka.hyperscan.wrapper;
 
 import com.gliwka.hyperscan.jni.hs_compile_error_t;
 import com.gliwka.hyperscan.jni.hs_database_t;
-import org.bytedeco.javacpp.*;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.PointerPointer;
+import org.bytedeco.javacpp.SizeTPointer;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -25,9 +28,10 @@ public class Database implements Closeable {
     private NativeDatabase database;
 
     private static class NativeDatabase extends hs_database_t {
-        private NativeDatabase() {
-            super();
-            this.deallocator(() -> hs_free_database(this));
+        @Override
+        public void close() {
+            hs_free_database(this);
+            super.close();
         }
     }
 
@@ -104,10 +108,10 @@ public class Database implements Closeable {
             }
         }
 
-        IntPointer nativeFlags = new IntPointer(flags);
-        IntPointer nativeIds = new IntPointer(ids);
-
-        try (PointerPointer<hs_compile_error_t> error = new PointerPointer<>(new hs_compile_error_t())) {
+        try (
+                IntPointer nativeFlags = new IntPointer(flags);
+                IntPointer nativeIds = new IntPointer(ids);
+                PointerPointer<hs_compile_error_t> error = new PointerPointer<>(new hs_compile_error_t())) {
 
             PointerPointer<NativeDatabase> database = new PointerPointer<>(1);
             int hsError = hs_compile_multi(nativeExpressions, nativeFlags, nativeIds, expressionsSize, HS_MODE_BLOCK, null, database, error);
@@ -151,6 +155,11 @@ public class Database implements Closeable {
     public void close() {
         database.close();
         database = null;
+    }
+
+    @Override
+    protected void finalize() {
+        close();
     }
 
     /**

@@ -27,7 +27,7 @@ import static java.util.Collections.emptyList;
  * There can only be 256 non-closed scanner instances.
  */
 public class Scanner implements Closeable {
-    private static final AtomicInteger count = new AtomicInteger();
+    private static int count = 0;
 
     public Scanner() {
         // The function pointer for the callback match_event_handler allocates native resources.
@@ -37,18 +37,19 @@ public class Scanner implements Closeable {
         // the right scanner. I've decided against it to keep this implementation simple and to not have
         // to manage references between context pointers and scanner instances
 
-        if(count.get() >= 256) {
+        if(count >= 256) {
             throw new RuntimeException("There can only be 256 non-closed Scanner instances. Create them once per thread!");
         }
 
-        count.incrementAndGet();
+        count++;
     }
 
 
     private static class NativeScratch extends hs_scratch_t {
-        private NativeScratch() {
-            super();
-            this.deallocator(() -> hs_free_scratch(this));
+        @Override
+        public void close() {
+            hs_free_scratch(this);
+            super.close();
         }
     }
 
@@ -128,14 +129,14 @@ public class Scanner implements Closeable {
 
         hs_database_t database = db.getDatabase();
 
-        final byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
-        final BytePointer bytePointer = new BytePointer(ByteBuffer.wrap(bytes));
-
         matchedIds.clear();
-        int hsError = hs_scan(database, bytePointer, bytes.length, 0, scratch, matchHandler, null);
+        final byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
+        try (final BytePointer bytePointer = new BytePointer(ByteBuffer.wrap(bytes))) {
+            int hsError = hs_scan(database, bytePointer, bytes.length, 0, scratch, matchHandler, null);
 
-        if(hsError != 0) {
-            throw HyperscanException.hsErrorToException(hsError);
+            if (hsError != 0) {
+                throw HyperscanException.hsErrorToException(hsError);
+            }
         }
 
         if(matchedIds.isEmpty()) {
@@ -183,7 +184,12 @@ public class Scanner implements Closeable {
     public void close() {
         scratch.close();
         matchHandler.close();
-        count.decrementAndGet();
+        count--;
         scratch = null;
+    }
+
+    @Override
+    protected void finalize() {
+        close();
     }
 }
