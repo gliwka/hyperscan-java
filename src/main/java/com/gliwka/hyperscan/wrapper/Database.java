@@ -19,7 +19,7 @@ import static java.util.function.Function.identity;
  * Database containing compiled expressions ready for scanning using the Scanner
  */
 public class Database implements Closeable {
-    private final Expression[] expressions;
+    private final Map<Integer, Expression> expressions;
     private final int expressionCount;
 
     private NativeDatabase database;
@@ -38,13 +38,13 @@ public class Database implements Closeable {
 
         boolean hasIds = expressions.get(0).getId() != null;
 
+        this.expressions = new HashMap<>(expressionCount);
         if (hasIds) {
-            int maxId = expressions.stream().mapToInt(Expression::getId).max().getAsInt();
-            this.expressions = new Expression[maxId + 1];
-
-            expressions.forEach(expression -> this.expressions[expression.getId()] = expression);
+            expressions.forEach(expression -> this.expressions.put(expression.getId(), expression));
         } else {
-            this.expressions = expressions.toArray(new Expression[0]);
+            for (int i = 0; i < expressions.size(); i++) {
+                this.expressions.put(i, expressions.get(i));
+            }
         }
     }
 
@@ -141,11 +141,7 @@ public class Database implements Closeable {
     }
 
     Expression getExpression(int id) {
-        return expressions[id];
-    }
-
-    int getExpressionCount() {
-        return expressionCount;
+        return expressions.get(id);
     }
 
     @Override
@@ -179,7 +175,7 @@ public class Database implements Closeable {
         DataOutputStream expressionsDataOut = new DataOutputStream(expressionsOut);
         // How many expressions will be present. We need this to know when to stop reading.
         expressionsDataOut.writeInt(expressionCount);
-        for (Expression expression : expressions) {
+        for (Expression expression : expressions.values()) {
             if (expression == null) {
                 continue;
             }
@@ -289,13 +285,13 @@ public class Database implements Closeable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Database database = (Database) o;
-        return expressionCount == database.expressionCount && Arrays.deepEquals(expressions, database.expressions);
+        return expressionCount == database.expressionCount && expressions.equals(database.expressions);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(expressionCount);
-        result = 31 * result + Arrays.hashCode(expressions);
+        result = 31 * result + expressions.hashCode();
         return result;
     }
 }
