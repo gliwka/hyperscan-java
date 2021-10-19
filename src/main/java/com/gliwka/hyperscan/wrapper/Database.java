@@ -40,10 +40,14 @@ public class Database implements Closeable {
 
         this.expressions = new HashMap<>(expressionCount);
         if (hasIds) {
-            expressions.forEach(expression -> this.expressions.put(expression.getId(), expression));
+            for (Expression expression : expressions) {
+                if (this.expressions.put(expression.getId(), expression) != null)
+                    throw new IllegalStateException("Expression ID must be unique within a Database.");
+            }
         } else {
-            for (int i = 0; i < expressions.size(); i++) {
-                this.expressions.put(i, expressions.get(i));
+            int i = 0;
+            for (Expression expression : expressions) {
+                this.expressions.put(i++, expression);
             }
         }
     }
@@ -93,7 +97,6 @@ public class Database implements Closeable {
         if (expressionWithId && expressionWithoutId) {
             throw new IllegalStateException("You can't mix expressions with and without id's in a single database");
         }
-
 
         for (int i = 0; i < expressionsSize; i++) {
             flags[i] = expressions.get(i).getFlagBits();
