@@ -46,10 +46,10 @@ public class Scanner implements Closeable {
 
 
     private static class NativeScratch extends hs_scratch_t {
-        @Override
-        public void close() {
-            hs_free_scratch(this);
-            super.close();
+        private NativeScratch() {
+            super();
+            hs_scratch_t p = new hs_scratch_t(this);
+            deallocator(() -> hs_free_scratch(p));
         }
     }
 
@@ -186,10 +186,5 @@ public class Scanner implements Closeable {
         matchHandler.close();
         count--;
         scratch = null;
-    }
-
-    @Override
-    protected void finalize() {
-        close();
     }
 }

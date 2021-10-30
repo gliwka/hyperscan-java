@@ -19,15 +19,15 @@ public class ReclaimObjectsTest {
     public void test() throws CompileErrorException, InterruptedException {
         Database db = Database.compile(new Expression("Te?st"));
         // some reclaimable objects are left behind after compile
-        assertEquals(3, Pointer.totalCount());
+        assertEquals(4, Pointer.totalCount());
 
         try (Scanner scanner = new Scanner()) {
             scanner.allocScratch(db);
-            assertEquals(4, Pointer.totalCount());
+            assertEquals(6, Pointer.totalCount());
             scanner.scan(db, "Test");
-            assertEquals(4, Pointer.totalCount());
+            assertEquals(6, Pointer.totalCount());
         }
-        assertEquals(3, Pointer.totalCount());
+        assertEquals(4, Pointer.totalCount());
 
         WeakReference<Database> ref = new WeakReference<>(db);
         //noinspection UnusedAssignment
@@ -40,6 +40,7 @@ public class ReclaimObjectsTest {
         }
 
         assertNull(ref.get(), "Database not reclaimed.");
+        Thread.sleep(100);
         assertEquals(0, Pointer.totalCount(), "Not all objects reclaimed");
         assertEquals(0, Pointer.totalBytes());
     }

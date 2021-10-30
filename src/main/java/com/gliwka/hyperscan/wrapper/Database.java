@@ -2,10 +2,7 @@ package com.gliwka.hyperscan.wrapper;
 
 import com.gliwka.hyperscan.jni.hs_compile_error_t;
 import com.gliwka.hyperscan.jni.hs_database_t;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.PointerPointer;
-import org.bytedeco.javacpp.SizeTPointer;
+import org.bytedeco.javacpp.*;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -28,16 +25,16 @@ public class Database implements Closeable {
     private NativeDatabase database;
 
     private static class NativeDatabase extends hs_database_t {
-        @Override
-        public void close() {
-            hs_free_database(this);
-            super.close();
+        void registerDeallocator() {
+            hs_database_t p = new hs_database_t(this);
+            deallocator(() -> hs_free_database(p));
         }
     }
 
     private Database(NativeDatabase database, List<Expression> expressions) {
         this.database = database;
         this.expressionCount = expressions.size();
+        database.registerDeallocator();
 
         boolean hasIds = expressions.get(0).getId() != null;
 
@@ -155,11 +152,6 @@ public class Database implements Closeable {
     public void close() {
         database.close();
         database = null;
-    }
-
-    @Override
-    protected void finalize() {
-        close();
     }
 
     /**
