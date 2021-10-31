@@ -46,8 +46,7 @@ public class Scanner implements Closeable {
 
 
     private static class NativeScratch extends hs_scratch_t {
-        private NativeScratch() {
-            super();
+        void registerDeallocator() {
             hs_scratch_t p = new hs_scratch_t(this);
             deallocator(() -> hs_free_scratch(p));
         }
@@ -99,6 +98,7 @@ public class Scanner implements Closeable {
 
         hs_database_t dbPointer = db.getDatabase();
         int hsError = hs_alloc_scratch(dbPointer, scratch);
+        scratch.registerDeallocator();
 
         if(hsError != 0) {
             throw HyperscanException.hsErrorToException(hsError);
