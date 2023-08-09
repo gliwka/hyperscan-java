@@ -51,7 +51,7 @@ public class PatternFilter implements Closeable {
                 notFilterable.add(pattern.matcher(""));
             }
             else {
-                expressions.add(mapToExpression(pattern, id));
+                expressions.add(expression);
                 matchers[id] = pattern.matcher("");
                 id++;
             }
