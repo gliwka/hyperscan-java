@@ -208,12 +208,12 @@
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>javacpp</artifactId>
-      <version>1.5.4</version>
+      <version>1.5.6</version>
     </dependency>
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>javacpp-platform</artifactId>
-      <version>1.5.4</version>
+      <version>1.5.6</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>

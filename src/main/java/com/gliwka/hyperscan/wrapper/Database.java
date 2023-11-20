@@ -25,15 +25,16 @@ public class Database implements Closeable {
     private NativeDatabase database;
 
     private static class NativeDatabase extends hs_database_t {
-        private NativeDatabase() {
-            super();
-            this.deallocator(() -> hs_free_database(this));
+        void registerDeallocator() {
+            hs_database_t p = new hs_database_t(this);
+            deallocator(() -> hs_free_database(p));
         }
     }
 
     private Database(NativeDatabase database, List<Expression> expressions) {
         this.database = database;
         this.expressionCount = expressions.size();
+        database.registerDeallocator();
 
         boolean hasIds = expressions.get(0).getId() != null;
 
@@ -104,12 +105,12 @@ public class Database implements Closeable {
             }
         }
 
-        IntPointer nativeFlags = new IntPointer(flags);
-        IntPointer nativeIds = new IntPointer(ids);
+        try (
+                IntPointer nativeFlags = new IntPointer(flags);
+                IntPointer nativeIds = new IntPointer(ids);
+                PointerPointer<NativeDatabase> database = new PointerPointer<>(1);
+                PointerPointer<hs_compile_error_t> error = new PointerPointer<>(new hs_compile_error_t())) {
 
-        try (PointerPointer<hs_compile_error_t> error = new PointerPointer<>(new hs_compile_error_t())) {
-
-            PointerPointer<NativeDatabase> database = new PointerPointer<>(1);
             int hsError = hs_compile_multi(nativeExpressions, nativeFlags, nativeIds, expressionsSize, HS_MODE_BLOCK, null, database, error);
 
             handleErrors(hsError, error.get(hs_compile_error_t.class), expressions);

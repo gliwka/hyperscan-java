@@ -46,9 +46,9 @@ public class Scanner implements Closeable {
 
 
     private static class NativeScratch extends hs_scratch_t {
-        private NativeScratch() {
-            super();
-            this.deallocator(() -> hs_free_scratch(this));
+        void registerDeallocator() {
+            hs_scratch_t p = new hs_scratch_t(this);
+            deallocator(() -> hs_free_scratch(p));
         }
     }
 
@@ -98,6 +98,7 @@ public class Scanner implements Closeable {
 
         hs_database_t dbPointer = db.getDatabase();
         int hsError = hs_alloc_scratch(dbPointer, scratch);
+        scratch.registerDeallocator();
 
         if(hsError != 0) {
             throw HyperscanException.hsErrorToException(hsError);
@@ -128,14 +129,14 @@ public class Scanner implements Closeable {
 
         hs_database_t database = db.getDatabase();
 
-        final byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
-        final BytePointer bytePointer = new BytePointer(ByteBuffer.wrap(bytes));
-
         matchedIds.clear();
-        int hsError = hs_scan(database, bytePointer, bytes.length, 0, scratch, matchHandler, null);
+        final byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
+        try (final BytePointer bytePointer = new BytePointer(ByteBuffer.wrap(bytes))) {
+            int hsError = hs_scan(database, bytePointer, bytes.length, 0, scratch, matchHandler, null);
 
-        if(hsError != 0) {
-            throw HyperscanException.hsErrorToException(hsError);
+            if (hsError != 0) {
+                throw HyperscanException.hsErrorToException(hsError);
+            }
         }
 
         if(matchedIds.isEmpty()) {
