@@ -16,8 +16,8 @@ import static com.gliwka.hyperscan.jni.hyperscan.*;
 @ToString
 public class Expression {
     @Getter @NonNull private final String expression;
-    @Getter private EnumSet<ExpressionFlag> flags = EnumSet.of(ExpressionFlag.NO_FLAG);
-    @Getter private Integer id;
+    @Getter private final EnumSet<ExpressionFlag> flags;
+    @Getter private final Integer id;
 
     /**
      * Represents the validation results for a expression
@@ -37,34 +37,32 @@ public class Expression {
     }
 
     public Expression(@NonNull String expression) {
-        this.expression = expression;
+        this(expression,  EnumSet.of(ExpressionFlag.NO_FLAG), null);
     }
 
     public Expression(@NonNull String expression, Integer id) {
-        this.expression = expression;
-        this.id = id;
+        this(expression,  EnumSet.of(ExpressionFlag.NO_FLAG), id);
     }
 
     public Expression(@NonNull String expression, @NonNull EnumSet<ExpressionFlag> flags) {
-        this.expression = expression;
-        this.flags = flags;
+        this(expression, flags, null);
     }
 
     public Expression(@NonNull String expression, @NonNull ExpressionFlag flag) {
-        this.expression = expression;
-        this.flags = EnumSet.of(flag);
+        this(expression, EnumSet.of(flag), null);
     }
 
     public Expression(@NonNull String expression, @NonNull EnumSet<ExpressionFlag> flags, Integer id) {
+        if (id != null && id < 0)
+            throw new IllegalArgumentException("id must be >=0: " + id);
+
         this.expression = expression;
         this.flags = flags;
         this.id = id;
     }
 
     public Expression(@NonNull String expression, @NonNull ExpressionFlag flag, Integer id) {
-        this.expression = expression;
-        this.flags = EnumSet.of(flag);
-        this.id = id;
+        this(expression, EnumSet.of(flag), id);
     }
 
     public ValidationResult validate() {
