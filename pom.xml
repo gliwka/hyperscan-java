@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.gliwka.hyperscan</groupId>
   <artifactId>hyperscan</artifactId>
-  <version>5.4.0-2.0.0</version>
+  <version>5.4.11-3.0.0</version>
   <name>hyperscan-java</name>
   <description>Java bindings for the high-performance multiple regular expression library hyperscan</description>
   <url>https://github.com/gliwka/hyperscan-java</url>
