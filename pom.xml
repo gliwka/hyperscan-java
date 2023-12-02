@@ -185,25 +185,31 @@
     <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.0-1.0.0</version>
+      <version>5.4.11-2.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.0-1.0.0</version>
+      <version>5.4.11-2.0.0</version>
       <classifier>linux-x86_64</classifier>
     </dependency>
-    <dependency>
+        <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.0-1.0.0</version>
-      <classifier>windows-x86_64</classifier>
+      <version>5.4.11-2.0.0</version>
+      <classifier>linux-arm64</classifier>
     </dependency>
     <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.0-1.0.0</version>
+      <version>5.4.11-2.0.0</version>
       <classifier>macosx-x86_64</classifier>
+    </dependency>
+    <dependency>
+      <groupId>com.gliwka.hyperscan</groupId>
+      <artifactId>native</artifactId>
+      <version>5.4.11-2.0.0</version>
+      <classifier>macosx-arm64</classifier>
     </dependency>
     <dependency>
       <groupId>org.bytedeco</groupId>
