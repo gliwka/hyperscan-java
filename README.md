@@ -10,31 +10,33 @@ It uses hybrid automata techniques to allow simultaneous matching of large numbe
 
 This project is a third-party developed wrapper for the [hyperscan](https://github.com/intel/hyperscan) project to enable developers to integrate hyperscan in their java (JVM) based projects.
 
+Because the latest hyperscan release is now under a [proprietary license](https://github.com/intel/hyperscan/issues/421) and ARM-support has never been integrated, this project utilizes the [vectorscan](https://github.com/VectorCamp/vectorscan) fork.
+
 ## Add it to your project
 This project is available on maven central. 
 
-The version number consists of two parts (i.e. 5.4.0-2.0.0).
-The first part specifies the hyperscan version (5.4.0), the second part the version of the wrapper
-(2.0.0)
+The version number consists of two parts (i.e. 5.4.11-3.0.0).
+The first part specifies the vectorscan version (5.4.11), the second part the version of this library utilizing semantic versioning
+(3.0.0).
 
 #### Maven
 ```xml
 <dependency>
     <groupId>com.gliwka.hyperscan</groupId>
     <artifactId>hyperscan</artifactId>
-    <version>5.4.0-2.0.0</version>
+    <version>5.4.11-3.0.0</version>
 </dependency>
 ```
 
 #### Gradle
 
 ```gradle
-compile group: 'com.gliwka.hyperscan', name: 'hyperscan', version: '5.4.0-2.0.0'
+compile group: 'com.gliwka.hyperscan', name: 'hyperscan', version: '5.4.11-3.0.0'
 ```
 
 #### sbt
 ```sbt
-libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "5.4.0-2.0.0"
+libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "5.4.11-3.0.0"
 ```
 
 ## Usage
@@ -140,11 +142,14 @@ catch(IOException ie) {
 
 
 ## Native libraries
-This wrapper ships with pre-compiled hyperscan binaries for windows, linux (glibc >=2.12) and osx for x86_64 CPUs.
+This library ships with pre-compiled vectorscan binaries for linux (glibc >=2.17) and macOS for x86_64 and arm64 CPUs. 
+
+Windows is no longer supported (last supported version is `5.4.0-2.0.0`) due to vectorscan dropping windows support.
+
 You can find the repository with the native libraries [here](https://github.com/gliwka/hyperscan-java-native)
 
 ## Documentation
-The [hyperscan developer reference](https://intel.github.io/hyperscan/dev-reference/) explains hyperscan.
+The [developer reference](https://intel.github.io/hyperscan/dev-reference/) explains vectorscan.
 The javadoc is located [here](https://gliwka.github.io/hyperscan-java/).
 
 ## Changelog
@@ -154,9 +159,9 @@ The javadoc is located [here](https://gliwka.github.io/hyperscan-java/).
  Feel free to raise issues or submit a pull request.
 
 ## Credits
-Shoutout to [@eliaslevy](https://github.com/eliaslevy), [@krzysztofzienkiewicz](https://github.com/krzysztofzienkiewicz) and [@swapnilnawale](https://github.com/swapnilnawale) for all the great contributions.
+Shoutout to [@eliaslevy](https://github.com/eliaslevy), [@krzysztofzienkiewicz](https://github.com/krzysztofzienkiewicz), [@swapnilnawale](https://github.com/swapnilnawale), [@mmimica](https://github.com/mmimica) and [@Jiar](https://github.com/Jiar) for all the great contributions.
 
-Thanks to Intel for opensourcing hyperscan!
+Thanks to Intel for opensourcing hyperscan and [@VectorCamp](https://github.com/VectorCamp) for actively maintaining the fork!
 
 ## License
 [BSD 3-Clause License](LICENSE)
