@@ -20,6 +20,7 @@ jobs:
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots verify
   deploy:
+    needs: build
     runs-on: ubuntu-22.04
     env:
       SIGN_KEY: ${{ secrets.SIGN_KEY }}
