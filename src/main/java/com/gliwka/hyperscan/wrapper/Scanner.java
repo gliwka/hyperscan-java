@@ -47,8 +47,10 @@ public class Scanner implements Closeable {
 
     private static class NativeScratch extends hs_scratch_t {
         void registerDeallocator() {
-            hs_scratch_t p = new hs_scratch_t(this);
-            deallocator(() -> hs_free_scratch(p));
+            if (deallocator() != null) {
+                hs_scratch_t p = new hs_scratch_t(this);
+                deallocator(() -> hs_free_scratch(p));
+            }
         }
     }
 
