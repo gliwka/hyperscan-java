@@ -4,6 +4,7 @@ import com.gliwka.hyperscan.jni.hs_database_t;
 import com.gliwka.hyperscan.jni.hs_scratch_t;
 import com.gliwka.hyperscan.jni.match_event_handler;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.SizeTPointer;
 
@@ -13,6 +14,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -27,21 +29,14 @@ import static java.util.Collections.emptyList;
  * There can only be 256 non-closed scanner instances.
  */
 public class Scanner implements Closeable {
-    private static final AtomicInteger count = new AtomicInteger();
+    private static final AtomicInteger scannerId = new AtomicInteger();
+    private static final ConcurrentHashMap<Integer, Scanner> scannerPool = new ConcurrentHashMap<>();
+    private final Integer scannerIdx = scannerId.incrementAndGet();
+    private final IntPointer scannerInstanceId = new IntPointer(1);
 
     public Scanner() {
-        // The function pointer for the callback match_event_handler allocates native resources.
-        // javacpp limits the number of function pointer instances to 10.
-        // The limit has been increased to 256 to match the thread count in modern server CPUs
-        // An alternative would be to have a single callback and to use the context pointer to identify
-        // the right scanner. I've decided against it to keep this implementation simple and to not have
-        // to manage references between context pointers and scanner instances
-
-        if(count.get() >= 256) {
-            throw new RuntimeException("There can only be 256 non-closed Scanner instances. Create them once per thread!");
-        }
-
-        count.incrementAndGet();
+        scannerInstanceId.put(scannerIdx);
+        scannerPool.put(scannerIdx, this);
     }
 
 
@@ -109,10 +104,13 @@ public class Scanner implements Closeable {
 
     private final LinkedList<long[]> matchedIds = new LinkedList<>();
 
-    private final match_event_handler matchHandler = new match_event_handler() {
+    private static final match_event_handler matchHandler = new match_event_handler() {
         public int call(int id, long from, long to, int flags, Pointer context) {
+            IntPointer intContext = (IntPointer) context;
+            int scannerId = intContext.get();
+            Scanner scanner = scannerPool.get(scannerId);
             long[] tuple = {id, from, to};
-            matchedIds.add(tuple);
+            scanner.matchedIds.add(tuple);
             return 0;
         }
     };
@@ -134,7 +132,7 @@ public class Scanner implements Closeable {
         matchedIds.clear();
         final byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
         try (final BytePointer bytePointer = new BytePointer(ByteBuffer.wrap(bytes))) {
-            int hsError = hs_scan(database, bytePointer, bytes.length, 0, scratch, matchHandler, null);
+            int hsError = hs_scan(database, bytePointer, bytes.length, 0, scratch, matchHandler, scannerInstanceId);
 
             if (hsError != 0) {
                 throw HyperscanException.hsErrorToException(hsError);
@@ -185,8 +183,8 @@ public class Scanner implements Closeable {
     @Override
     public void close() {
         scratch.close();
-        matchHandler.close();
-        count.decrementAndGet();
         scratch = null;
+        scannerPool.remove(scannerIdx);
+        scannerInstanceId.close();
     }
 }
