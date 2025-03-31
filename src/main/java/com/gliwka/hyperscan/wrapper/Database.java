@@ -76,7 +76,17 @@ public class Database implements Closeable {
     }
 
     /**
-     * Compiles an list of expressions into a database to use for scanning
+     * Compiles a list of expressions into a database to use for scanning
+     *
+     * @param expressions List of expressions to compile
+     * @return Compiled database
+     */
+    public static Database compile(Expression... expressions) throws CompileErrorException {
+        return Database.compile(Arrays.asList(expressions));
+    }
+
+    /**
+     * Compiles a list of expressions into a database to use for scanning
      *
      * @param expressions List of expressions to compile
      * @return Compiled database
