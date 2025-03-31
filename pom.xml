@@ -34,21 +34,16 @@
     </developerConnection>
     <url>https://github.com/gliwka/hyperscan-java</url>
   </scm>
-  <distributionManagement>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement>
   <repositories>
     <repository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <name>Central Portal Snapshots</name>
+      <id>central-portal-snapshots</id>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
       <snapshots>
+        <enabled>true</enabled>
         <updatePolicy>always</updatePolicy>
       </snapshots>
     </repository>
@@ -185,30 +180,30 @@
     <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.11-2.0.0</version>
+      <version>5.4.11-2.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.11-2.0.0</version>
+      <version>5.4.11-2.0.1-SNAPSHOT</version>
       <classifier>linux-x86_64</classifier>
     </dependency>
         <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.11-2.0.0</version>
+      <version>5.4.11-2.0.1-SNAPSHOT</version>
       <classifier>linux-arm64</classifier>
     </dependency>
     <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.11-2.0.0</version>
+      <version>5.4.11-2.0.1-SNAPSHOT</version>
       <classifier>macosx-x86_64</classifier>
     </dependency>
     <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.11-2.0.0</version>
+      <version>5.4.11-2.0.1-SNAPSHOT</version>
       <classifier>macosx-arm64</classifier>
     </dependency>
     <dependency>
