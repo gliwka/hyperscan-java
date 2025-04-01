@@ -180,36 +180,36 @@
     <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.11-2.0.1-SNAPSHOT</version>
+      <version>5.4.11-2.0.1</version>
     </dependency>
     <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.11-2.0.1-SNAPSHOT</version>
+      <version>5.4.11-2.0.1</version>
       <classifier>linux-x86_64</classifier>
     </dependency>
         <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.11-2.0.1-SNAPSHOT</version>
+      <version>5.4.11-2.0.1</version>
       <classifier>linux-arm64</classifier>
     </dependency>
     <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.11-2.0.1-SNAPSHOT</version>
+      <version>5.4.11-2.0.1</version>
       <classifier>macosx-x86_64</classifier>
     </dependency>
     <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.11-2.0.1-SNAPSHOT</version>
+      <version>5.4.11-2.0.1</version>
       <classifier>macosx-arm64</classifier>
     </dependency>
     <dependency>
       <groupId>org.bytedeco</groupId>
       <artifactId>javacpp</artifactId>
-      <version>1.5.9</version>
+      <version>1.5.11</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
