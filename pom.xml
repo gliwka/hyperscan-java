@@ -149,6 +149,19 @@
         <configuration>
           <source>8</source>
           <target>8</target>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>1.18.30</version>
+            </path>
+            <!-- Added JMH Annotation Processor -->
+            <path>
+              <groupId>org.openjdk.jmh</groupId>
+              <artifactId>jmh-generator-annprocess</artifactId>
+              <version>1.37</version> <!-- Match jmh-core version -->
+            </path>
+          </annotationProcessorPaths>
         </configuration>
       </plugin>
       <plugin>

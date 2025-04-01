@@ -136,6 +136,15 @@ public class Database implements Closeable {
         return database;
     }
 
+    /**
+     * Provides direct access to the underlying Hyperscan database pointer.
+     * Use with caution, intended for internal or advanced use cases.
+     *
+     * @return The native hs_database_t pointer.
+     */
+    public hs_database_t getDatabasePtr() {
+        return database;
+    }
 
     /**
      * Get the database size in bytes
