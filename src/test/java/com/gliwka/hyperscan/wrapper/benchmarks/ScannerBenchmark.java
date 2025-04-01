@@ -21,7 +21,6 @@ public class ScannerBenchmark {
     private Database database;
     private String shortTextFewMatches;
     private String longTextManyMatches;
-    private PooledScanner pooledScanner; // Pool is shared across threads
     private String currentText;
 
     // --- Parameters ---
@@ -113,47 +112,10 @@ public class ScannerBenchmark {
         }
         longTextManyMatches = longBuilder.toString();
 
-        // Initialize PooledScanner - size matches thread count
-        pooledScanner = new PooledScanner(threadCount, threadCount);
-
         // Determine which text to use based on param
         currentText = "shortFew".equals(textType) ? shortTextFewMatches : longTextManyMatches;
         System.out.println("Using text length: " + currentText.length());
         System.out.println("Global setup complete.");
-    }
-
-    @TearDown(Level.Trial)
-    public void teardownBenchmark() {
-        System.out.println("Global teardown starting...");
-        if (pooledScanner != null) {
-            try {
-                pooledScanner.close();
-            } catch (Exception e) {
-                System.err.println("Error closing pooled scanner: " + e.getMessage());
-            }
-        }
-         // Database is closed automatically by its finalizer in this setup,
-         // but explicit close is good practice if needed elsewhere.
-        // if (database != null) { ... database.close(); ... }
-        System.out.println("Global teardown complete.");
-    }
-
-    @Benchmark
-    @Threads(Threads.MAX) // Use the threadCount parameter
-    public void benchmarkPooledScanner(Blackhole bh) {
-        try {
-            // PooledScanner.scan handles acquire/release internally
-            List<Match> matches = pooledScanner.scan(database, currentText);
-            bh.consume(matches);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            // Log or handle appropriately in real code
-            System.err.println("Benchmark interrupted (PooledScanner)");
-        } catch (Exception e) {
-            // Log or handle exception appropriately in real code
-            System.err.println("Exception in PooledScanner benchmark: " + e.getMessage());
-        }
-        // No explicit acquire/release needed here
     }
 
     @Benchmark

@@ -23,9 +23,9 @@ public class ReclaimObjectsTest {
 
         try (Scanner scanner = new Scanner()) {
             scanner.allocScratch(db);
-            assertEquals(5, Pointer.totalCount());
+            assertEquals(4, Pointer.totalCount());
             scanner.scan(db, "Test");
-            assertEquals(5, Pointer.totalCount());
+            assertEquals(4, Pointer.totalCount());
         }
         assertEquals(3, Pointer.totalCount());
 
