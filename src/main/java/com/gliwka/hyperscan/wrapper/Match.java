@@ -32,7 +32,7 @@ public class Match {
     }
 
     /**
-     * Get the end position of the match
+     * Get the end position of the match (inclusive)
      * @return end position of match regardless of flags
      */
     public long getEndPosition() {
