@@ -7,6 +7,15 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class ScannerTest {
+    @Test
+    void canCreateHighNumberOfScannersWithoutRunningOutOfNativeHandles() throws CompileErrorException {
+        for (int i = 0; i < 100_000; i++) {
+            Scanner scanner = new Scanner();
+            Database db = Database.compile(new Expression("a"));
+            scanner.allocScratch(db);
+            assertFalse(scanner.scan(db, "aaa").isEmpty());
+        }
+    }
 
     @Test
     void oneScannerWithMultipleDatabases() throws Exception {
