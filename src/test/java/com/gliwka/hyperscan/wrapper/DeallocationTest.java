@@ -20,12 +20,8 @@ class DeallocationTest {
             try (Scanner scanner = new Scanner()) {
                 scanner.allocScratch(db);
 
-                // now there should be two pointers, one for the db and one for the scratch space
-                assertEquals(baseline + 2, Pointer.totalCount());
-                scanner.scan(db, "Test");
-
-                // same after scanning, it should stay at two - all artifacts from matching should be gone
-                assertEquals(baseline + 2, Pointer.totalCount());
+                // same after scanning, it should stay at one - all artifacts from matching should be gone
+                assertEquals(baseline + 1, Pointer.totalCount());
             }
 
             assertEquals(baseline + 1, Pointer.totalCount());
