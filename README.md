@@ -99,7 +99,7 @@ expressions.add(new Expression("Test", ExpressionFlag.CASELESS));
 
 //since we're interacting with native handles always use try-with-resources or call the close method after use
 try(Database db = Database.compile(expressions)) {
-    //initialize scanner - not thread-safe, so one scanner per concurrent thread!
+    //initialize scanner - one scanner per thread!
     //same here, always use try-with-resources or call the close method after use
     try(Scanner scanner = new Scanner())
     {
