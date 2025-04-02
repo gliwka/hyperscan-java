@@ -2,6 +2,8 @@ package com.gliwka.hyperscan.wrapper;
 
 import com.gliwka.hyperscan.jni.hs_compile_error_t;
 import com.gliwka.hyperscan.jni.hs_database_t;
+import org.apache.commons.codec.binary.Base64InputStream;
+import org.apache.commons.codec.binary.Base64OutputStream;
 import org.bytedeco.javacpp.*;
 
 import java.io.*;
@@ -9,6 +11,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterInputStream;
 
 import static com.gliwka.hyperscan.jni.hyperscan.*;
 import static java.util.Collections.singletonList;
@@ -143,6 +147,39 @@ public class Database implements Closeable {
     public void close() {
         database.close();
         database = null;
+    }
+
+    /**
+     * Create BASE64 encoded and compressed database with expressions
+     * Database can be deserialized using {@link #deserialize(String)}
+     *
+     * @return serialized database
+     */
+    public String serialize() throws IOException {
+        try (
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                Base64OutputStream base64OutputStream = new Base64OutputStream(byteArrayOutputStream, true);
+                DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(base64OutputStream)
+        ) {
+            save(deflaterOutputStream);
+            deflaterOutputStream.finish();
+            return new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8);
+        }
+    }
+
+    /**
+     * Create database from BASE64 encoded string created by {@link #serialize()}
+     * @param input serialized database
+     * @return  database
+     */
+    public static Database deserialize(String input) throws IOException {
+        try (
+                InputStream byteArrayInputStream = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
+                Base64InputStream base64InputStream = new Base64InputStream(byteArrayInputStream, false);
+                InputStream inflaterInputStream = new InflaterInputStream(base64InputStream)
+        ) {
+            return load(inflaterInputStream);
+        }
     }
 
     /**
