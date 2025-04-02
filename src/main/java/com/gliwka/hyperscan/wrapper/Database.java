@@ -141,8 +141,10 @@ public class Database implements Closeable {
 
     @Override
     public void close() {
-        database.close();
-        database = null;
+        if(database != null) {
+            database.close();
+            database = null;
+        }
     }
 
     /**
