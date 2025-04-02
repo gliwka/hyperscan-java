@@ -1,39 +1,54 @@
 package com.gliwka.hyperscan.wrapper;
 
 import org.bytedeco.javacpp.Pointer;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.lang.ref.WeakReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class DeallocationTest {
     @Test
-    public void ensureAllNativeMemoryIsBeingFreed() throws CompileErrorException, InterruptedException {
-        long baseline = Pointer.totalCount();
-
+    @Order(0)
+    public void ensureAllNativeMemoryIsBeingFreed() throws CompileErrorException {
         try(Database db = Database.compile(new Expression("Te?st"))) {
             // we only expect the database pointer, all compile artifacts should have been freed
-            assertEquals(baseline + 1, Pointer.totalCount());
+            assertEquals(1, Pointer.totalCount());
 
             try (Scanner scanner = new Scanner()) {
                 scanner.allocScratch(db);
 
-                // same after scanning, it should stay at one - all artifacts from matching should be gone
-                assertEquals(baseline + 1, Pointer.totalCount());
+                // now there should be two pointers, one for the db and one for the callback
+                assertEquals(2, Pointer.totalCount());
+
+                // creating an additional scanner should not increase it
+                Scanner additionalScanner = new Scanner();
+                additionalScanner.allocScratch(db);
+                assertEquals(2, Pointer.totalCount());
+
+
+                scanner.scan(db, "Test");
+                // same after scanning, it should stay at two - all artifacts from matching should be gone
+                assertEquals(2, Pointer.totalCount());
             }
 
-            assertEquals(baseline + 1, Pointer.totalCount());
+            assertEquals(2, Pointer.totalCount());
         }
 
-        // All resources are closed, there should be no more open native references
-        assertEquals(baseline, Pointer.totalCount());
+        // All resources are closed, there should be only the scanner callback remaining
+        assertEquals(1, Pointer.totalCount());
     }
 
     @Test
+    @Order(1)
     void nativeHandlesShouldBeGarbageCollectable() throws CompileErrorException {
-        long baseline = Pointer.totalCount();
+        // expect baseline to be 1 - only the open callback from the previous test should exist
+        assertEquals(1, Pointer.totalCount());
 
         Database db = Database.compile(new Expression("Te?st"));
         Scanner scanner = new Scanner();
@@ -45,7 +60,7 @@ class DeallocationTest {
         db = null;
         scanner = null;
 
-        assertEquals(baseline + 1, Pointer.totalCount());
+        assertEquals(2, Pointer.totalCount());
         assertNotNull(dbRef);
         assertNotNull(scannerRef);
 
@@ -53,12 +68,14 @@ class DeallocationTest {
             System.gc();
         }
 
+        // all should be freed, besides the scanner callback
         assertNull(dbRef.get());
         assertNull(scannerRef.get());
-        assertTrue(Pointer.totalCount() <= baseline);
+        assertEquals(1, Pointer.totalCount());
     }
 
     @Test
+    @Order(2)
     void databaseShouldThrowExceptionOnCallingSizeAfterClose() {
         try {
             Database db = Database.compile(new Expression("test"));
