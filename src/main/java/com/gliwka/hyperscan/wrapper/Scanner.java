@@ -22,16 +22,7 @@ import static com.gliwka.hyperscan.jni.hyperscan.*;
 import static java.util.Collections.emptyList;
 
 public class Scanner implements Closeable {
-    private static final AtomicInteger scannerCounter = new AtomicInteger();
-    private static final ConcurrentHashMap<Integer, Scanner> scannerReferences = new ConcurrentHashMap<>();
-
-    private final Integer scannerId = scannerCounter.incrementAndGet();
-    private final IntPointer scannerIdPointer = new IntPointer(1);
-
-    public Scanner() {
-        scannerIdPointer.put(scannerId);
-        scannerReferences.put(scannerId, this);
-    }
+    private static final ThreadLocal<Scanner> callbackScanner = new ThreadLocal<>();
 
     private static class NativeScratch extends hs_scratch_t {
         void registerDeallocator() {
@@ -99,11 +90,8 @@ public class Scanner implements Closeable {
 
     private static final match_event_handler matchHandler = new match_event_handler() {
         public int call(int id, long from, long to, int flags, Pointer context) {
-            IntPointer scannerIdPointer = context.getPointer(IntPointer.class);
-            Scanner callbackScanner = scannerReferences.get(scannerIdPointer.get());
-
             long[] tuple = {id, from, to};
-            callbackScanner.matchedIds.add(tuple);
+            callbackScanner.get().matchedIds.add(tuple);
             return 0;
         }
     };
@@ -116,33 +104,40 @@ public class Scanner implements Closeable {
      * @return List of Matches
      */
     public List<Match> scan(final Database db, final String input) {
-        if(scratch == null) {
-            throw new IllegalStateException("Scratch space has already been deallocated");
-        }
+        try {
+            callbackScanner.set(this);
 
-        hs_database_t database = db.getDatabase();
+            if(scratch == null) {
+                throw new IllegalStateException("Scratch space has already been deallocated");
+            }
 
-        matchedIds.clear();
-        final byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
-        try (final BytePointer bytePointer = new BytePointer(ByteBuffer.wrap(bytes))) {
-            int hsError = hs_scan(database, bytePointer, bytes.length, 0, scratch, matchHandler, scannerIdPointer);
+            hs_database_t database = db.getDatabase();
 
-            if (hsError != 0) {
-                throw HyperscanException.hsErrorToException(hsError);
+            matchedIds.clear();
+            final byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
+            try (final BytePointer bytePointer = new BytePointer(ByteBuffer.wrap(bytes))) {
+                int hsError = hs_scan(database, bytePointer, bytes.length, 0, scratch, matchHandler, null);
+
+                if (hsError != 0) {
+                    throw HyperscanException.hsErrorToException(hsError);
+                }
+            }
+
+            if(matchedIds.isEmpty()) {
+                return emptyList();
+            }
+
+            //if string length == byte length, all characters are 1 byte wide -> ASCII, no position mapping necessary
+            if(bytes.length == input.length()) {
+                return processMatches(input, bytes, db, position -> position);
+            }
+            else {
+                final int[] byteToStringPosition = Utf8.byteToStringPositionMap(input, bytes.length);
+                return processMatches(input, bytes, db, bytePosition -> byteToStringPosition[bytePosition]);
             }
         }
-
-        if(matchedIds.isEmpty()) {
-            return emptyList();
-        }
-
-        //if string length == byte length, all characters are 1 byte wide -> ASCII, no position mapping necessary
-        if(bytes.length == input.length()) {
-            return processMatches(input, bytes, db, position -> position);
-        }
-        else {
-            final int[] byteToStringPosition = Utf8.byteToStringPositionMap(input, bytes.length);
-            return processMatches(input, bytes, db, bytePosition -> byteToStringPosition[bytePosition]);
+        finally {
+            callbackScanner.remove();
         }
     }
 
@@ -176,8 +171,6 @@ public class Scanner implements Closeable {
     @Override
     public void close() {
         scratch.close();
-        scannerIdPointer.close();
-        scannerReferences.remove(scannerId);
         scratch = null;
     }
 }
