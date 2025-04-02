@@ -7,7 +7,6 @@ import org.bytedeco.javacpp.*;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -92,39 +91,22 @@ public class Database implements Closeable {
      * @return Compiled database
      */
     public static Database compile(List<Expression> expressions) throws CompileErrorException {
-        final int expressionsSize = expressions.size();
-
-        String[] expressionArray = expressions.stream().map(Expression::getExpression).toArray(String[]::new);
-        PointerPointer<BytePointer> nativeExpressions = new PointerPointer<>(expressionsSize);
-        nativeExpressions.putString(expressionArray, StandardCharsets.UTF_8);
-
-        int[] flags = new int[expressionsSize];
-        int[] ids = new int[expressionsSize];
-
-        boolean expressionWithoutId = expressions.stream().anyMatch(expression -> expression.getId() == null);
-        boolean expressionWithId = expressions.stream().anyMatch(expression -> expression.getId() != null);
-
-        if (expressionWithId && expressionWithoutId) {
-            throw new IllegalStateException("You can't mix expressions with and without id's in a single database");
-        }
-
-        for (int i = 0; i < expressionsSize; i++) {
-            flags[i] = expressions.get(i).getFlagBits();
-
-            if (expressionWithId) {
-                ids[i] = expressions.get(i).getId();
-            } else {
-                ids[i] = i;
-            }
-        }
-
         try (
-                IntPointer nativeFlags = new IntPointer(flags);
-                IntPointer nativeIds = new IntPointer(ids);
+                NativeExpressionCollection nativeExpressions = new NativeExpressionCollection(expressions);
+                hs_compile_error_t errorT = new hs_compile_error_t();
                 PointerPointer<NativeDatabase> database = new PointerPointer<>(1);
-                PointerPointer<hs_compile_error_t> error = new PointerPointer<>(new hs_compile_error_t())) {
+                PointerPointer<hs_compile_error_t> error = new PointerPointer<>(errorT)
+        ) {
 
-            int hsError = hs_compile_multi(nativeExpressions, nativeFlags, nativeIds, expressionsSize, HS_MODE_BLOCK, null, database, error);
+            int hsError = hs_compile_multi(
+                    nativeExpressions.getExpressionsBytes(),
+                    nativeExpressions.getNativeFlags(),
+                    nativeExpressions.getNativeIds(),
+                    nativeExpressions.getSize(),
+                    HS_MODE_BLOCK,
+                    null,
+                    database,
+                    error);
 
             handleErrors(hsError, error.get(hs_compile_error_t.class), expressions);
 
