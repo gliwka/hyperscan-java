@@ -19,11 +19,10 @@ public class PerformanceRegressionTest {
     private static final double MAX_DEVIATION = 0.20; //variance on github actions
 
     @Test
-    @Disabled
     public void runJmhBenchmark() throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(PerformanceRegressionBenchmark.class.getSimpleName())
-                .threads(2)
+                .threads(16)
                 .forks(3)
                 .build();
         Collection<RunResult> runResults = new Runner(opt).run();
