@@ -4,6 +4,7 @@ import com.gliwka.hyperscan.jni.hs_database_t;
 import com.gliwka.hyperscan.jni.hs_scratch_t;
 import com.gliwka.hyperscan.jni.match_event_handler;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.SizeTPointer;
 
@@ -13,37 +14,24 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import static com.gliwka.hyperscan.jni.hyperscan.*;
 import static java.util.Collections.emptyList;
 
-/**
- * Scanner, can be used with databases to scan for expressions in input string
- * In case of multithreaded scanning, you need one scanner instance per CPU thread.
- *
- * Scanner references native resources. It is paramount to close it after use.
- * There can only be 256 non-closed scanner instances.
- */
 public class Scanner implements Closeable {
-    private static final AtomicInteger count = new AtomicInteger();
+    private static final AtomicInteger scannerCounter = new AtomicInteger();
+    private static final ConcurrentHashMap<Integer, Scanner> scannerReferences = new ConcurrentHashMap<>();
+
+    private final Integer scannerId = scannerCounter.incrementAndGet();
+    private final IntPointer scannerIdPointer = new IntPointer(1);
 
     public Scanner() {
-        // The function pointer for the callback match_event_handler allocates native resources.
-        // javacpp limits the number of function pointer instances to 10.
-        // The limit has been increased to 256 to match the thread count in modern server CPUs
-        // An alternative would be to have a single callback and to use the context pointer to identify
-        // the right scanner. I've decided against it to keep this implementation simple and to not have
-        // to manage references between context pointers and scanner instances
-
-        if(count.get() >= 256) {
-            throw new RuntimeException("There can only be 256 non-closed Scanner instances. Create them once per thread!");
-        }
-
-        count.incrementAndGet();
+        scannerIdPointer.put(scannerId);
+        scannerReferences.put(scannerId, this);
     }
-
 
     private static class NativeScratch extends hs_scratch_t {
         void registerDeallocator() {
@@ -109,17 +97,20 @@ public class Scanner implements Closeable {
 
     private final LinkedList<long[]> matchedIds = new LinkedList<>();
 
-    private final match_event_handler matchHandler = new match_event_handler() {
+    private static final match_event_handler matchHandler = new match_event_handler() {
         public int call(int id, long from, long to, int flags, Pointer context) {
+            IntPointer scannerIdPointer = context.getPointer(IntPointer.class);
+            Scanner callbackScanner = scannerReferences.get(scannerIdPointer.get());
+
             long[] tuple = {id, from, to};
-            matchedIds.add(tuple);
+            callbackScanner.matchedIds.add(tuple);
             return 0;
         }
     };
 
     /**
      * scan for a match in a string using a compiled expression database
-     * Can only be executed one at a time on a per instance basis
+     * Can only be executed one at a time on a per-instance basis
      * @param db Database containing expressions to use for matching
      * @param input String to match against
      * @return List of Matches
@@ -134,7 +125,7 @@ public class Scanner implements Closeable {
         matchedIds.clear();
         final byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
         try (final BytePointer bytePointer = new BytePointer(ByteBuffer.wrap(bytes))) {
-            int hsError = hs_scan(database, bytePointer, bytes.length, 0, scratch, matchHandler, null);
+            int hsError = hs_scan(database, bytePointer, bytes.length, 0, scratch, matchHandler, scannerIdPointer);
 
             if (hsError != 0) {
                 throw HyperscanException.hsErrorToException(hsError);
@@ -185,8 +176,8 @@ public class Scanner implements Closeable {
     @Override
     public void close() {
         scratch.close();
-        matchHandler.close();
-        count.decrementAndGet();
+        scannerIdPointer.close();
+        scannerReferences.remove(scannerId);
         scratch = null;
     }
 }

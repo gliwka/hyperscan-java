@@ -42,13 +42,14 @@ class DeallocationTest {
         Database db = Database.compile(new Expression("Te?st"));
         Scanner scanner = new Scanner();
         scanner.allocScratch(db);
+        scanner.close();
 
         WeakReference<Database> dbRef = new WeakReference<>(db);
         WeakReference<Scanner> scannerRef = new WeakReference<>(scanner);
         db = null;
         scanner = null;
 
-        assertEquals(baseline + 2, Pointer.totalCount());
+        assertEquals(baseline + 1, Pointer.totalCount());
         assertNotNull(dbRef);
         assertNotNull(scannerRef);
 
