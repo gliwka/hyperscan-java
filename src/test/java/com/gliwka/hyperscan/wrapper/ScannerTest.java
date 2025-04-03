@@ -497,12 +497,12 @@ class ScannerTest {
         Expression expression = new Expression("Hallo", EnumSet.of(ExpressionFlag.UTF8, ExpressionFlag.SOM_LEFTMOST), 700);
         try (Database db = Database.compile(expression)) {
             scanner.allocScratch(db);
-            String text = "\uD83D\uDE00Hallo";
+            String text = "\uD83D\uDE00�Hallo";
             List<Match> matches = scanner.scan(db, text);
             assertThat(matches).hasSize(1);
             assertThat(matches.get(0)).satisfies(m -> {
-                assertMatchById(m, 2, 6, 700);
-                assertThat(m.getMatchedString()).isEqualTo("\uD83D\uDE00");
+                assertMatchById(m, 3, 7, 700);
+                assertThat(m.getMatchedString()).isEqualTo("Hallo");
             });
             scanner.allocScratch(database);
         }
