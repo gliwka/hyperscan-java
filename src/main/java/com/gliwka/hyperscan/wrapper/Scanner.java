@@ -21,6 +21,10 @@ import static java.util.Collections.emptyList;
 /**
  * Scanner, can be used with databases to scan for expressions in input string
  * Not thread-safe, so no concurrent usage. Ideally create one per thread.
+ *
+ * @see Database
+ * @see Expression
+ * @see Match
  */
 public class Scanner implements Closeable {
     private static final ThreadLocal<RawMatchEventHandler> activeCallback = new ThreadLocal<>();
@@ -46,7 +50,7 @@ public class Scanner implements Closeable {
 
 
     /**
-     * Get the version information for the underlying hyperscan library
+     * Get the version in  formation for the underlying hyperscan library
      * @return version string
      */
     public static String getVersion() {
@@ -71,6 +75,7 @@ public class Scanner implements Closeable {
     /**
      * Allocate a scratch space.  Must be called at least once with each
      * database that will be used before scan is called.
+     *
      * @param db Database containing expressions to use for matching
      */
     public void allocScratch(final Database db) {
@@ -96,10 +101,11 @@ public class Scanner implements Closeable {
     };
 
     /**
-     * scan for a match in a string using a compiled expression database
-     * Can only be executed one at a time on a per-instance basis
-     * @param db Database containing expressions to use for matching
-     * @param input String to match against
+     * Scans a  string for matches using a compiled expression database and returns a list of matches.
+     * Can only be executed one at a time on a per-instance basis.
+     *
+     * @param db    Database containing expressions to use for matching.
+     * @param input String to match against.
      * @return List of Matches
      */
     public List<Match> scan(final Database db, final String input) {
@@ -204,10 +210,6 @@ public class Scanner implements Closeable {
      * @return true if at least one match is found, false otherwise.
      */
     public boolean hasMatch(final Database db, final ByteBuffer input) {
-        if (!input.isDirect()) {
-            throw new IllegalArgumentException("Input ByteBuffer must be direct");
-        }
-
         // This handler returns false immediately upon the first match, terminating the scan.
         RawMatchEventHandler terminationHandler = (expressionId, fromByteIdx, toByteIdx, flags) -> false; // Request scan termination
 

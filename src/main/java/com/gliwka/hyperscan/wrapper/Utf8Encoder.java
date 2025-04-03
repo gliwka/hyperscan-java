@@ -14,6 +14,8 @@
  * under the License.
  */
 
+// Encoding ripped of from here https://github.com/netty/netty/blob/fa94493e4d9809f3d489edbc0bd1c28eb6a4d71c/buffer/src/main/java/io/netty/buffer/ByteBufUtil.java#L960
+
 package com.gliwka.hyperscan.wrapper;
 
 import java.nio.Buffer;
@@ -23,7 +25,7 @@ import static java.lang.Character.isSurrogate;
 
 /**
  * Encode UTF-8 string and create a mapping from back from bytes to string
- * at the same time. Encoding ripped of from here https://github.com/netty/netty/blob/fa94493e4d9809f3d489edbc0bd1c28eb6a4d71c/buffer/src/main/java/io/netty/buffer/ByteBufUtil.java#L960
+ * at the same time. UTF-8 is being done manually to be able to do it in a single pass.
  */
 class Utf8Encoder {
     private static final byte WRITE_UTF_UNKNOWN = '?';
