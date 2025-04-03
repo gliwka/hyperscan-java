@@ -6,7 +6,6 @@ package com.gliwka.hyperscan.wrapper;
  * match found during a scan operation when using the byte-offset based scanning methods.
  *
  * @see Scanner#scan(Database, byte[], ByteMatchEventHandler)
- * @see Scanner#scan(Database, java.nio.ByteBuffer, ByteMatchEventHandler)
  */
 @FunctionalInterface
 public interface ByteMatchEventHandler {

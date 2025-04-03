@@ -69,6 +69,7 @@ public class Database implements Closeable {
      *
      * @param expression Expression to compile
      * @return Compiled database
+     * @throws CompileErrorException If the expression cannot be compiled
      */
     public static Database compile(Expression expression) throws CompileErrorException {
         return compile(singletonList(expression));
@@ -79,6 +80,7 @@ public class Database implements Closeable {
      *
      * @param expressions List of expressions to compile
      * @return Compiled database
+     * @throws CompileErrorException If any of the expressions cannot be compiled
      */
     public static Database compile(Expression... expressions) throws CompileErrorException {
         return Database.compile(Arrays.asList(expressions));
@@ -89,6 +91,7 @@ public class Database implements Closeable {
      *
      * @param expressions List of expressions to compile
      * @return Compiled database
+     * @throws CompileErrorException If any of the expressions cannot be compiled
      */
     public static Database compile(List<Expression> expressions) throws CompileErrorException {
         try (
@@ -153,6 +156,7 @@ public class Database implements Closeable {
      * The OutputStream is not closed.
      *
      * @param out stream to write to
+     * @throws IOException If an I/O error occurs while writing to the stream
      */
     public void save(OutputStream out) throws IOException {
         save(out, out);
@@ -167,6 +171,7 @@ public class Database implements Closeable {
      *
      * @param expressionsOut stream to write expressions to
      * @param databaseOut    stream to write database to
+     * @throws IOException If an I/O error occurs while writing to either stream
      */
     public void save(OutputStream expressionsOut, OutputStream databaseOut) throws IOException {
         DataOutputStream expressionsDataOut = new DataOutputStream(expressionsOut);
@@ -221,6 +226,7 @@ public class Database implements Closeable {
      *
      * @param in stream to read from
      * @return loaded Database
+     * @throws IOException If an I/O error occurs while reading from the stream
      */
     public static Database load(InputStream in) throws IOException {
         return load(in, in);
@@ -234,6 +240,7 @@ public class Database implements Closeable {
      * @param expressionsIn stream to read expressions from
      * @param databaseIn    stream to read database from
      * @return loaded Database
+     * @throws IOException If an I/O error occurs while reading from either stream
      */
     public static Database load(InputStream expressionsIn, InputStream databaseIn) throws IOException {
         // DataInputStream doesn't buffer so it will only read as much as we ask for.
