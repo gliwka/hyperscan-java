@@ -41,6 +41,15 @@ public class Scanner implements Closeable {
     private NativeScratch scratch = new NativeScratch();
 
     /**
+     * Creates a new Scanner instance.
+     * Each scanner maintains its own scratch space which needs to be allocated
+     * with the {@link #allocScratch(Database)} method before scanning.
+     */
+    public Scanner() {
+        // Default constructor with initialized scratch space
+    }
+
+    /**
      * Check if the hardware platform is supported
      * @return true if supported, otherwise false
      */
