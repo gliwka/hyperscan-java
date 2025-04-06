@@ -3,6 +3,7 @@ package com.gliwka.hyperscan.wrapper;
 import com.gliwka.hyperscan.jni.hs_database_t;
 import com.gliwka.hyperscan.jni.hs_scratch_t;
 import com.gliwka.hyperscan.jni.match_event_handler;
+import com.gliwka.hyperscan.wrapper.mapping.ByteCharMapping;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.SizeTPointer;
@@ -144,15 +145,15 @@ public class Scanner implements Closeable {
      */
     public void scan(final Database db, final String input, StringMatchEventHandler eventHandler) {
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(input.length() * 4);
-        final int[] mapping = Utf8Encoder.encodeToBufferAndMap(byteBuffer, input);
+        final ByteCharMapping mapping = Utf8Encoder.encodeToBufferAndMap(byteBuffer, input);
 
         scan(db, byteBuffer, (expressionId, fromByteIdx, toByteIdx, flags) -> {
             Expression expression = db.getExpression(expressionId);
-            long fromStringIndex = mapping.length > 0 ? mapping[(int)fromByteIdx] : 0;
+            long fromStringIndex = mapping.getMappingSize() > 0 ? mapping.getCharIndex((int)fromByteIdx) : 0;
             long toStringIndex = 0;
 
             if(toByteIdx > 0) {
-                toStringIndex = mapping.length > 0 ? mapping[(int)toByteIdx - 1] : 0;
+                toStringIndex = mapping.getMappingSize() > 0 ? mapping.getCharIndex((int)toByteIdx - 1) : 0;
             }
 
             return eventHandler.onMatch(expression, fromStringIndex, toStringIndex);
