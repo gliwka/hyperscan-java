@@ -32,30 +32,42 @@ import static java.lang.Character.isSurrogate;
  */
 class Utf8Encoder {
     private static final byte WRITE_UTF_UNKNOWN = '?';
-    static int[] encodeToBufferAndMap(ByteBuffer buffer, String string) {
-        int[] mapping = new int[buffer.capacity()];
+    private static final int UTF8_1_BYTE_LIMIT = 0x80;  // Max char code for 1-byte UTF-8 (exclusive)
+    private static final int UTF8_2_BYTE_LIMIT = 0x800; // Max char code for 2-byte UTF-8 (exclusive)
+
+    /**
+     * Encodes a Java String to a direct ByteBuffer containing UTF-8 bytes
+     * and creates a mapping from byte index to character index.
+     *
+     * @param buffer The ByteBuffer to write the UTF-8 bytes to
+     * @param string The Java String to encode
+     * @return An array of int values representing the mapping from byte index to character index
+     */
+    static ByteCharMapping encodeToBufferAndMap(ByteBuffer buffer, String string) {
+        ByteCharMapping mapping = ByteCharMapping.create(buffer.capacity(), string.length());
+
         int writerIndex = 0;
         int end = string.length();
         for (int i = 0; i < end; i++) {
             char c = string.charAt(i);
-            if (c < 0x80) {
-                mapping[writerIndex++] = i;
+            if (c < UTF8_1_BYTE_LIMIT) {
+                mapping.setCharIndex(writerIndex++, i);
                 buffer.put((byte) c);
-            } else if (c < 0x800) {
-                mapping[writerIndex++] = i;
+            } else if (c < UTF8_2_BYTE_LIMIT) {
+                mapping.setCharIndex(writerIndex++, i);
                 buffer.put((byte) (0xc0 | (c >> 6)));
-                mapping[writerIndex++] = i;
+                mapping.setCharIndex(writerIndex++, i);
                 buffer.put((byte) (0x80 | (c & 0x3f)));
             } else if (isSurrogate(c)) {
                 if (!Character.isHighSurrogate(c)) {
-                    mapping[writerIndex++] = i;
+                    mapping.setCharIndex(writerIndex++, i);
                     buffer.put(WRITE_UTF_UNKNOWN);
                     continue;
                 }
                 // Surrogate Pair consumes 2 characters.
                 int firstSurrogate = i; // Save original position for mapping
                 if (++i == end) {
-                    mapping[writerIndex++] = firstSurrogate;
+                    mapping.setCharIndex(writerIndex++, firstSurrogate);
                     buffer.put(WRITE_UTF_UNKNOWN);
                     break;
                 }
@@ -63,29 +75,29 @@ class Utf8Encoder {
                 // and increase the chance to inline CharSequence::charAt instead
                 char c2 = string.charAt(i);
                 if (!Character.isLowSurrogate(c2)) {
-                    mapping[writerIndex++] = firstSurrogate;
+                    mapping.setCharIndex(writerIndex++, firstSurrogate);
                     buffer.put(WRITE_UTF_UNKNOWN);
-                    mapping[writerIndex++] = i;
+                    mapping.setCharIndex(writerIndex++, i);
                     buffer.put(Character.isHighSurrogate(c2)? WRITE_UTF_UNKNOWN : (byte) c2);
                 } else {
                     int codePoint = Character.toCodePoint(c, c2);
                     // See https://www.unicode.org/versions/Unicode7.0.0/ch03.pdf#G2630.
-                    mapping[writerIndex++] = firstSurrogate;
+                    mapping.setCharIndex(writerIndex++, firstSurrogate);
                     buffer.put((byte) (0xf0 | (codePoint >> 18)));
-                    mapping[writerIndex++] = firstSurrogate;
+                    mapping.setCharIndex(writerIndex++, firstSurrogate);
                     buffer.put((byte) (0x80 | ((codePoint >> 12) & 0x3f)));
-                    mapping[writerIndex++] = i;
+                    mapping.setCharIndex(writerIndex++, i);
                     buffer.put((byte) (0x80 | ((codePoint >> 6) & 0x3f)));
-                    mapping[writerIndex++] = i;
+                    mapping.setCharIndex(writerIndex++, i);
                     buffer.put((byte) (0x80 | (codePoint & 0x3f)));
                 }
             } else {
                 // 3-byte UTF-8 encoding for non-surrogate characters
-                mapping[writerIndex++] = i;
+                mapping.setCharIndex(writerIndex++, i);
                 buffer.put((byte) (0xe0 | ((c >> 12) & 0xf))); // Mask high bits
-                mapping[writerIndex++] = i;
+                mapping.setCharIndex(writerIndex++, i);
                 buffer.put((byte) (0x80 | ((c >> 6) & 0x3f)));
-                mapping[writerIndex++] = i;
+                mapping.setCharIndex(writerIndex++, i);
                 buffer.put((byte) (0x80 | (c & 0x3f)));
             }
         }
