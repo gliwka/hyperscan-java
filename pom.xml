@@ -80,23 +80,12 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.7.0</version>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.7.0</version>
         <extensions>true</extensions>
-        <executions>
-          <execution>
-            <id>default-deploy</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>deploy</goal>
-            </goals>
-          </execution>
-        </executions>
         <configuration>
-          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-          <serverId>ossrh</serverId>
-          <stagingProfileId>487fa319ba2685</stagingProfileId>
+          <publishingServerId>central</publishingServerId>
         </configuration>
       </plugin>
       <plugin>
