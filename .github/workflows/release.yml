@@ -35,9 +35,9 @@ jobs:
         with:
           servers: |
             [{
-                "id": "ossrh",
-                "username": "gliwka",
-                "password": "${{ secrets.OSSRH_JIRA_PASSWORD }}"
+                "id": "central",
+                "username": "${{ secrets.CENTRAL_TOKEN_USERNAME }}",
+                "password": "${{ secrets.CENTRAL_TOKEN_PASSWORD }}"
             }]
       - name: Deploy to central
         run: mvn --batch-mode deploy
