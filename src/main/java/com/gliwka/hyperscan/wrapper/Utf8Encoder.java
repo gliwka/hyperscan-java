@@ -18,14 +18,17 @@
 
 package com.gliwka.hyperscan.wrapper;
 
+import com.gliwka.hyperscan.wrapper.mapping.ByteCharMapping;
+
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 import static java.lang.Character.isSurrogate;
 
 /**
- * Encode UTF-8 string and create a mapping from back from bytes to string
- * at the same time. UTF-8 is being done manually to be able to do it in a single pass.
+ * Encode UTF-8 string and create a mapping from bytes back to string
+ * at the same time. UTF-8 is being done manually to be able to do it in a single pass and
+ * have a reliable mapping back to the string position
  */
 class Utf8Encoder {
     private static final byte WRITE_UTF_UNKNOWN = '?';
@@ -50,8 +53,9 @@ class Utf8Encoder {
                     continue;
                 }
                 // Surrogate Pair consumes 2 characters.
+                int firstSurrogate = i; // Save original position for mapping
                 if (++i == end) {
-                    mapping[writerIndex++] = i;
+                    mapping[writerIndex++] = firstSurrogate;
                     buffer.put(WRITE_UTF_UNKNOWN);
                     break;
                 }
@@ -59,16 +63,16 @@ class Utf8Encoder {
                 // and increase the chance to inline CharSequence::charAt instead
                 char c2 = string.charAt(i);
                 if (!Character.isLowSurrogate(c2)) {
-                    mapping[writerIndex++] = i;
+                    mapping[writerIndex++] = firstSurrogate;
                     buffer.put(WRITE_UTF_UNKNOWN);
                     mapping[writerIndex++] = i;
                     buffer.put(Character.isHighSurrogate(c2)? WRITE_UTF_UNKNOWN : (byte) c2);
                 } else {
                     int codePoint = Character.toCodePoint(c, c2);
                     // See https://www.unicode.org/versions/Unicode7.0.0/ch03.pdf#G2630.
-                    mapping[writerIndex++] = i;
+                    mapping[writerIndex++] = firstSurrogate;
                     buffer.put((byte) (0xf0 | (codePoint >> 18)));
-                    mapping[writerIndex++] = i;
+                    mapping[writerIndex++] = firstSurrogate;
                     buffer.put((byte) (0x80 | ((codePoint >> 12) & 0x3f)));
                     mapping[writerIndex++] = i;
                     buffer.put((byte) (0x80 | ((codePoint >> 6) & 0x3f)));
@@ -76,8 +80,9 @@ class Utf8Encoder {
                     buffer.put((byte) (0x80 | (codePoint & 0x3f)));
                 }
             } else {
+                // 3-byte UTF-8 encoding for non-surrogate characters
                 mapping[writerIndex++] = i;
-                buffer.put((byte) (0xe0 | (c >> 12)));
+                buffer.put((byte) (0xe0 | ((c >> 12) & 0xf))); // Mask high bits
                 mapping[writerIndex++] = i;
                 buffer.put((byte) (0x80 | ((c >> 6) & 0x3f)));
                 mapping[writerIndex++] = i;
