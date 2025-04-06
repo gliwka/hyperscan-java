@@ -20,27 +20,27 @@ Vectorscan uses hybrid automata techniques to allow simultaneous matching of lar
 
 ## Installation
 
-The library is available on Maven Central. The version number consists of two parts (e.g., `5.4.11-3.0.0`):
+The library is available on Maven Central. The version number consists of two parts (e.g., `5.4.11-3.1.0`):
 - First part: Vectorscan version (`5.4.11`)
-- Second part: Library version using semantic versioning (`3.0.0`)
+- Second part: Library version using semantic versioning (`3.1.0`)
 
 ### Maven
 ```xml
 <dependency>
     <groupId>com.gliwka.hyperscan</groupId>
     <artifactId>hyperscan</artifactId>
-    <version>5.4.11-3.0.0</version>
+    <version>5.4.11-3.1.0</version>
 </dependency>
 ```
 
 ### Gradle
 ```gradle
-implementation 'com.gliwka.hyperscan:hyperscan:5.4.11-3.0.0'
+implementation 'com.gliwka.hyperscan:hyperscan:5.4.11-3.1.0'
 ```
 
 ### SBT
 ```sbt
-libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "5.4.11-3.0.0"
+libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "5.4.11-3.1.0"
 ```
 
 ## Usage Options
@@ -339,7 +339,7 @@ Feel free to raise issues or submit pull requests. Please see the native librari
 
 ## Credits
 
-Special thanks to [@eliaslevy](https://github.com/eliaslevy), [@krzysztofzienkiewicz](https://github.com/krzysztofzienkiewicz), [@swapnilnawale](https://github.com/swapnilnawale), [@mmimica](https://github.com/mmimica), and [@Jiar](https://github.com/Jiar) for their contributions.
+Special thanks to [@eliaslevy](https://github.com/eliaslevy), [@krzysztofzienkiewicz](https://github.com/krzysztofzienkiewicz), [@swapnilnawale](https://github.com/swapnilnawale), [@mmimica](https://github.com/mmimica), [@Jiar](https://github.com/Jiar) and [@apismensky](https://github.com/apismensky) for their contributions.
 
 Thanks to Intel for originally open-sourcing Hyperscan and [@VectorCamp](https://github.com/VectorCamp) for actively maintaining the Vectorscan fork!
 
