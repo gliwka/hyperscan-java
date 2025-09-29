@@ -6,8 +6,6 @@ import com.gliwka.hyperscan.wrapper.Database;
 import com.gliwka.hyperscan.wrapper.Expression;
 import com.gliwka.hyperscan.wrapper.Match;
 import com.gliwka.hyperscan.wrapper.Scanner;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,8 +51,8 @@ final class ScopedPatternFilterImpl<T> implements ScopedPatternFilter<T> {
         this.database = Database.compile(expressions);
         this.scanner = new Scanner();
         this.scanner.allocScratch(database);
-        this.filterable = ImmutableList.copyOf(filterable);
-        this.notFilterable = ImmutableList.copyOf(notFilterable);
+        this.filterable = filterable;
+        this.notFilterable = notFilterable;
     }
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
@@ -68,16 +66,22 @@ final class ScopedPatternFilterImpl<T> implements ScopedPatternFilter<T> {
         }
     }
 
+    private void ensureOpen() {
+        if (closed.get()) {
+            throw new IllegalStateException("Pattern filter is closed.");
+        }
+    }
+
     @Override
     public List<T> filter(String input) {
-        Preconditions.checkNotNull(input);
-        Preconditions.checkState(!closed.get(), "Pattern filter is closed");
+        Objects.requireNonNull(input, "input cannot be null");
+        ensureOpen();
         List<Match> matches;
         // Close is performed by another thread, so we need to synchronize access to the scanner
-        // In a single-threaded context because of the lite locking mechanism by JVM, the performance
+        // In a single-threaded context because of the bias locking mechanism by JVM, the performance
         // impact should be minimal
         synchronized (scanner) {
-            Preconditions.checkState(!closed.get(), "Pattern filter is closed");
+            ensureOpen();
             matches = scanner.scan(database, input);
         }
         List<T> potentialMatches = new ArrayList<>(matches.size() + notFilterable.size());

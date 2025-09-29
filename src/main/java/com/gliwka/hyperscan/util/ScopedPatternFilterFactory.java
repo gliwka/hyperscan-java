@@ -1,26 +1,27 @@
 package com.gliwka.hyperscan.util;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.gliwka.hyperscan.wrapper.CompileErrorException;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.MapMaker;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.AccessLevel;
 import lombok.Getter;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.ref.ReferenceQueue;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -86,18 +87,32 @@ import java.util.regex.Pattern;
 public final class ScopedPatternFilterFactory<T> implements Supplier<ScopedPatternFilter<T>>, Closeable {
 
     // A single, shared, daemon cleaner thread for all factory instances.
-    private static final ScheduledExecutorService CLEANER_SERVICE = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setThreadFactory(Executors.defaultThreadFactory()).setNameFormat("ScopedPatternFilter-Shared-Cleaner-%d").setDaemon(true).build());
+    private static final ScheduledExecutorService CLEANER_SERVICE = Executors.newSingleThreadScheduledExecutor(new NamedDaemonThreadFactory());
 
     // --- Instance-specific fields ---
     private final ReferenceQueue<ScopedPatternFilter<?>> referenceQueue = new ReferenceQueue<>();
     private final AtomicBoolean closed = new AtomicBoolean(false);
 
+    /**
+     * This set holds strong references to the PatternFilterCleaner objects.
+     * This is necessary because if the PhantomReference objects themselves were only weakly
+     * reachable, they could be garbage collected before they are enqueued, and the
+     * cleanup logic would never run.
+     */
     @Getter(AccessLevel.PACKAGE)
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     private final Set<PatternFilterCleaner> refKeeper = ConcurrentHashMap.newKeySet();
 
     @Getter(AccessLevel.PACKAGE)
-    private final ConcurrentMap<Thread, ScopedPatternFilter<T>> threadLocalFilters = new MapMaker().weakKeys().makeMap();
+    private final ConcurrentMap<Thread, ScopedPatternFilter<T>> threadLocalFilters = Caffeine.newBuilder().weakKeys().<Thread, ScopedPatternFilter<T>>removalListener((key, value, cause) -> {
+        if (value != null) {
+            try {
+                value.close();
+            } catch (IOException e) {
+                // Log this error.
+            }
+        }
+    }).build().asMap();
 
     private final ScheduledFuture<?> cleanerTaskFuture; // Handle to this instance's cleanup task.
 
@@ -105,10 +120,16 @@ public final class ScopedPatternFilterFactory<T> implements Supplier<ScopedPatte
     private final Function<? super T, ? extends Pattern> patternMapper;
 
     public ScopedPatternFilterFactory(Iterable<T> patterns, Function<? super T, ? extends Pattern> patternMapper) {
-        Preconditions.checkNotNull(patternMapper, "patternMapper cannot be null");
-        Preconditions.checkNotNull(patterns, "patterns cannot be null");
-        this.patterns = ImmutableList.copyOf(patterns);
-        Preconditions.checkArgument(!this.patterns.isEmpty(), "patterns cannot be empty");
+        Objects.requireNonNull(patternMapper, "patternMapper cannot be null");
+        Objects.requireNonNull(patterns, "patterns cannot be null");
+        this.patterns = new ArrayList<>();
+        for (T pattern : patterns) {
+            Objects.requireNonNull(pattern, "patterns cannot contain null elements");
+            this.patterns.add(pattern);
+        }
+        if (this.patterns.isEmpty()) {
+            throw new IllegalArgumentException("patterns cannot be empty");
+        }
         this.patternMapper = patternMapper;
 
         // Schedule this instance's cleanup task on the shared executor.
@@ -132,8 +153,14 @@ public final class ScopedPatternFilterFactory<T> implements Supplier<ScopedPatte
         }
     }
 
+    private void ensureOpen() {
+        if (closed.get()) {
+            throw new IllegalStateException("ScopedPatternFilterFactory is closed.");
+        }
+    }
+
     private ScopedPatternFilter<T> createFilter() {
-        Preconditions.checkState(!closed.get(), "ScopedPatternFilterFactory is closed.");
+        ensureOpen();
         try {
             ScopedPatternFilterImpl<T> filter = new ScopedPatternFilterImpl<>(patterns, patternMapper);
             // Use this instance's referenceQueue.
@@ -147,7 +174,7 @@ public final class ScopedPatternFilterFactory<T> implements Supplier<ScopedPatte
 
     @Override
     public ScopedPatternFilter<T> get() {
-        Preconditions.checkState(!closed.get(), "ScopedPatternFilterFactory is closed.");
+        ensureOpen();
         ScopedPatternFilter<T> filter = threadLocalFilters.computeIfAbsent(Thread.currentThread(), t -> createFilter());
         return new ScopedPatternFilterProxy<>(filter);
     }
@@ -175,6 +202,20 @@ public final class ScopedPatternFilterFactory<T> implements Supplier<ScopedPatte
             // 4. Perform a final cleanup pass and clear the reference keeper.
             cleanUp();
             refKeeper.clear();
+        }
+    }
+
+    private static final class NamedDaemonThreadFactory implements ThreadFactory {
+        private static final String NAME_FORMAT = "ScopedPatternFilter-Shared-Cleaner-%d";
+        private final ThreadFactory delegate = Executors.defaultThreadFactory();
+        private final AtomicInteger counter = new AtomicInteger(0);
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = delegate.newThread(r);
+            t.setName(String.format(NAME_FORMAT, counter.getAndIncrement()));
+            t.setDaemon(true);
+            return t;
         }
     }
 }

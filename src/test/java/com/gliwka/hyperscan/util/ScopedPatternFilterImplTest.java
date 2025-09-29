@@ -1,11 +1,11 @@
 package com.gliwka.hyperscan.util;
 
-import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -33,7 +33,7 @@ class ScopedPatternFilterImplTest {
     void setUp() throws Exception {
         // Initialize with a mix of patterns. This ensures the Hyperscan database
         // can be compiled with at least one valid expression.
-        List<Pattern> allPatterns = ImmutableList.of(compatiblePattern, incompatiblePattern);
+        List<Pattern> allPatterns = Arrays.asList(compatiblePattern, incompatiblePattern);
         filter = new ScopedPatternFilterImpl<>(allPatterns, Function.identity());
     }
 
@@ -65,7 +65,7 @@ class ScopedPatternFilterImplTest {
     void filter_shouldThrowIllegalStateExceptionIfClosed() throws IOException {
         filter.close();
 
-        assertThatThrownBy(() -> filter.filter("some input")).isInstanceOf(IllegalStateException.class).hasMessage("Pattern filter is closed");
+        assertThatThrownBy(() -> filter.filter("some input")).isInstanceOf(IllegalStateException.class).hasMessage("Pattern filter is closed.");
     }
 
     @Test
@@ -76,6 +76,6 @@ class ScopedPatternFilterImplTest {
         closeAction.run();
 
         // After running, the filter should be closed
-        assertThatThrownBy(() -> filter.filter("test")).isInstanceOf(IllegalStateException.class).hasMessage("Pattern filter is closed");
+        assertThatThrownBy(() -> filter.filter("test")).isInstanceOf(IllegalStateException.class).hasMessage("Pattern filter is closed.");
     }
 }

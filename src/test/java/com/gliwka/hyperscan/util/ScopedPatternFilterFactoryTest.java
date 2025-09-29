@@ -74,7 +74,7 @@ class ScopedPatternFilterFactoryTest {
             factory.close();
 
             // The previously dispensed filter must now be unusable and throw an exception.
-            assertThatThrownBy(() -> activeFilter.filter("test")).isInstanceOf(IllegalStateException.class).hasMessage("Pattern filter is closed");
+            assertThatThrownBy(() -> activeFilter.filter("test")).isInstanceOf(IllegalStateException.class).hasMessage("Pattern filter is closed.");
         }
     }
 
