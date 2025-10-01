@@ -1,6 +1,7 @@
 package com.gliwka.hyperscan.util;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.gliwka.hyperscan.wrapper.CompileErrorException;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -104,18 +105,8 @@ public final class ScopedPatternFilterFactory<T> implements Supplier<ScopedPatte
     private final Set<PatternFilterCleaner> refKeeper = ConcurrentHashMap.newKeySet();
 
     @Getter(AccessLevel.PACKAGE)
-    private final ConcurrentMap<Thread, ScopedPatternFilter<T>> threadLocalFilters = Caffeine.newBuilder().weakKeys().<Thread, ScopedPatternFilter<T>>removalListener((key, value, cause) -> {
-        if (value != null) {
-            try {
-                value.close();
-            } catch (IOException e) {
-                // Log this error.
-            }
-        }
-    }).build().asMap();
-
+    private final ConcurrentMap<Thread, ScopedPatternFilter<T>> threadLocalFilters = Caffeine.newBuilder().weakKeys().removalListener(this::handleRemoval).build().asMap();
     private final ScheduledFuture<?> cleanerTaskFuture; // Handle to this instance's cleanup task.
-
     private final List<T> patterns;
     private final Function<? super T, ? extends Pattern> patternMapper;
 
@@ -138,6 +129,16 @@ public final class ScopedPatternFilterFactory<T> implements Supplier<ScopedPatte
 
     public static ScopedPatternFilterFactory<Pattern> ofPatterns(Iterable<Pattern> patterns) {
         return new ScopedPatternFilterFactory<>(patterns, Function.identity());
+    }
+
+    private void handleRemoval(Thread thread, ScopedPatternFilter<T> filter, RemovalCause cause) {
+        if (filter != null) {
+            try {
+                filter.close();
+            } catch (IOException e) {
+                // Log this error.
+            }
+        }
     }
 
     // This is an instance method that knows about this instance's queue and refKeeper.
