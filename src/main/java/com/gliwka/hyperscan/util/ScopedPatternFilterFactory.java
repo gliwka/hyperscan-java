@@ -87,8 +87,6 @@ import java.util.regex.Pattern;
  */
 public final class ScopedPatternFilterFactory<T> implements Supplier<ScopedPatternFilter<T>>, Closeable {
 
-    // A single, shared, daemon cleaner thread for all factory instances.
-    private static final ScheduledExecutorService CLEANER_SERVICE = Executors.newSingleThreadScheduledExecutor(new NamedDaemonThreadFactory());
 
     // --- Instance-specific fields ---
     private final ReferenceQueue<ScopedPatternFilter<?>> referenceQueue = new ReferenceQueue<>();
@@ -124,7 +122,7 @@ public final class ScopedPatternFilterFactory<T> implements Supplier<ScopedPatte
         this.patternMapper = patternMapper;
 
         // Schedule this instance's cleanup task on the shared executor.
-        this.cleanerTaskFuture = CLEANER_SERVICE.scheduleWithFixedDelay(this::cleanUp, 1, 1, TimeUnit.SECONDS);
+        this.cleanerTaskFuture = ExecutorHolder.CLEANER_SERVICE.scheduleWithFixedDelay(this::cleanUp, 1, 1, TimeUnit.SECONDS);
     }
 
     public static ScopedPatternFilterFactory<Pattern> ofPatterns(Iterable<Pattern> patterns) {
@@ -204,6 +202,12 @@ public final class ScopedPatternFilterFactory<T> implements Supplier<ScopedPatte
             cleanUp();
             refKeeper.clear();
         }
+    }
+
+    private enum ExecutorHolder {
+        ;
+        // A single, shared, daemon cleaner thread for all factory instances.
+        static final ScheduledExecutorService CLEANER_SERVICE = Executors.newSingleThreadScheduledExecutor(new NamedDaemonThreadFactory());
     }
 
     private static final class NamedDaemonThreadFactory implements ThreadFactory {
