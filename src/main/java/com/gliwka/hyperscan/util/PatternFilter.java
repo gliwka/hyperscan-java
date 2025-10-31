@@ -52,7 +52,7 @@ public class PatternFilter implements Closeable {
         int id = 0;
 
         for(Pattern pattern : patterns) {
-            Expression expression = mapToExpression(pattern, id);
+            Expression expression = ExpressionUtil.mapToExpression(pattern, id);
 
             if(expression == null) {
                 //can't be compiled to expression -> not filterable
@@ -89,39 +89,6 @@ public class PatternFilter implements Closeable {
         matchedMatchers.forEach(matcher -> matcher.reset(input));
 
         return matchedMatchers;
-    }
-
-    private Expression mapToExpression(Pattern pattern, int id) {
-        EnumSet<ExpressionFlag> flags = EnumSet.of(
-            ExpressionFlag.UTF8,
-            ExpressionFlag.PREFILTER,
-            ExpressionFlag.ALLOWEMPTY,
-            ExpressionFlag.SINGLEMATCH
-        );
-
-        if(hasFlag(pattern, Pattern.CASE_INSENSITIVE)) {
-            flags.add(ExpressionFlag.CASELESS);
-        }
-
-        if(hasFlag(pattern, Pattern.MULTILINE)) {
-            flags.add(ExpressionFlag.MULTILINE);
-        }
-
-        if(hasFlag(pattern, Pattern.DOTALL)) {
-            flags.add(ExpressionFlag.DOTALL);
-        }
-
-        Expression expression = new Expression(pattern.pattern(), flags, id);
-
-        if(!expression.validate().isValid()) {
-            return null;
-        }
-
-        return expression;
-    }
-
-    private boolean hasFlag(Pattern pattern, int flag) {
-        return (pattern.flags() & flag) == flag;
     }
 
     @Override
