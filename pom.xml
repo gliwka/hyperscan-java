@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.gliwka.hyperscan</groupId>
   <artifactId>hyperscan</artifactId>
-  <version>5.4.11-3.1.0</version>
+  <version>5.4.12-3.1.1</version>
   <name>hyperscan-java</name>
   <description>Java bindings for the high-performance multiple regular expression library hyperscan</description>
   <url>https://github.com/gliwka/hyperscan-java</url>
@@ -211,30 +211,30 @@
     <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.12-2.0.3</version>
+      <version>5.4.12-2.0.4</version>
     </dependency>
     <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.12-2.0.3</version>
+      <version>5.4.12-2.0.4</version>
       <classifier>linux-x86_64</classifier>
     </dependency>
     <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.12-2.0.3</version>
+      <version>5.4.12-2.0.4</version>
       <classifier>linux-arm64</classifier>
     </dependency>
     <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.12-2.0.3</version>
+      <version>5.4.12-2.0.4</version>
       <classifier>macosx-x86_64</classifier>
     </dependency>
     <dependency>
       <groupId>com.gliwka.hyperscan</groupId>
       <artifactId>native</artifactId>
-      <version>5.4.12-2.0.3</version>
+      <version>5.4.12-2.0.4</version>
       <classifier>macosx-arm64</classifier>
     </dependency>
     <dependency>
