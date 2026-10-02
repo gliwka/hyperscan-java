@@ -10,10 +10,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-13, macos-13-xlarge, ubuntu-22.04, ubuntu-24.04-arm]
+        os: [macos-14, macos-14-xlarge, ubuntu-24.04, ubuntu-24.04-arm]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6
         with:
           distribution: 'temurin'
           java-version: '21'
@@ -21,17 +21,17 @@ jobs:
         run: mvn --batch-mode --update-snapshots verify
   deploy:
     needs: build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       SIGN_KEY: ${{ secrets.SIGN_KEY }}
       SIGN_KEY_PASS: ${{ secrets.SIGN_KEY_PASS }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6
         with:
           distribution: 'temurin'
           java-version: '21'
-      - uses: s4u/maven-settings-action@v2.4.0
+      - uses: s4u/maven-settings-action@894661b3ddae382f1ae8edbeab60987e08cf0788
         with:
           servers: |
             [{
