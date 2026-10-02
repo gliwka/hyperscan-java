@@ -194,6 +194,50 @@ class ScannerTest {
         utfDb.close();
     }
 
+    @Test
+    void scanDirectByteBufferWithHandler_shouldInvokeHandler() {
+        byte[] data = "test test1 test test3".getBytes(StandardCharsets.UTF_8);
+        java.nio.ByteBuffer buffer = java.nio.ByteBuffer.allocateDirect(data.length);
+        buffer.put(data);
+        ((java.nio.Buffer) buffer).flip();
+
+        AtomicInteger matchCount2 = new AtomicInteger(0);
+        final List<String> matchedExprs = new ArrayList<>();
+
+        scanner.scan(database, buffer, (expression, from, to) -> {
+            matchCount2.incrementAndGet();
+            matchedExprs.add(expression.getExpression());
+            return true;
+        });
+
+        assertThat(matchCount2.get()).isEqualTo(6);
+        assertThat(matchedExprs).containsExactlyInAnyOrder("test", "test", "test1", "test", "test", "test3");
+        assertThat(buffer.position()).isEqualTo(0);
+        assertThat(buffer.limit()).isEqualTo(data.length);
+    }
+
+    @Test
+    void scanHeapByteBufferWithHandler_shouldInvokeHandler() {
+        java.nio.ByteBuffer buffer = java.nio.ByteBuffer.wrap("xx test yy".getBytes(StandardCharsets.UTF_8));
+        ((java.nio.Buffer) buffer).position(3);
+        ((java.nio.Buffer) buffer).limit(7);
+
+        AtomicInteger matchCount2 = new AtomicInteger(0);
+        final List<Long> matchPositions2 = new ArrayList<>();
+
+        scanner.scan(database, buffer, (expression, from, to) -> {
+            matchCount2.incrementAndGet();
+            matchPositions2.add(from);
+            matchPositions2.add(to);
+            return true;
+        });
+
+        assertThat(matchCount2.get()).isEqualTo(1);
+        assertThat(matchPositions2).containsExactly(0L, 4L);
+        assertThat(buffer.position()).isEqualTo(3);
+        assertThat(buffer.limit()).isEqualTo(7);
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"Test", "A test string", "Another TEST"})
     void hasMatch_shouldReturnTrueIfMatchExists(String input) {

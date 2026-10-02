@@ -10,6 +10,37 @@ import static org.junit.jupiter.api.Assertions.*;
 public class Utf8EncoderTest {
 
     @Test
+    public void testAsciiEncodingUsesIdentityMapping() {
+        String input = "plain ascii text";
+        ByteBuffer buffer = ByteBuffer.allocate(100);
+
+        ByteCharMapping mapping = Utf8Encoder.encodeToBufferAndMap(buffer, input);
+
+        assertEquals(0, mapping.getMappingSize());
+        assertEquals(input.length(), buffer.limit());
+        for (int i = 0; i < input.length(); i++) {
+            assertEquals(i, mapping.getCharIndex(i));
+        }
+    }
+
+    @Test
+    public void testMappingAllocatedOnFirstNonAscii() {
+        String input = "ab世cd";
+        ByteBuffer buffer = ByteBuffer.allocate(100);
+
+        ByteCharMapping mapping = Utf8Encoder.encodeToBufferAndMap(buffer, input);
+
+        assertEquals(7, buffer.limit());
+        assertEquals(0, mapping.getCharIndex(0));
+        assertEquals(1, mapping.getCharIndex(1));
+        assertEquals(2, mapping.getCharIndex(2));
+        assertEquals(2, mapping.getCharIndex(3));
+        assertEquals(2, mapping.getCharIndex(4));
+        assertEquals(3, mapping.getCharIndex(5));
+        assertEquals(4, mapping.getCharIndex(6));
+    }
+
+    @Test
     public void testAsciiEncoding() {
         String input = "Hello, world!";
         ByteBuffer buffer = ByteBuffer.allocate(100);

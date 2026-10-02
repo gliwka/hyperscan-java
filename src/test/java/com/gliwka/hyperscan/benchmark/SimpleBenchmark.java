@@ -1,6 +1,7 @@
 package com.gliwka.hyperscan.benchmark;
 
 import com.gliwka.hyperscan.wrapper.*;
+import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 

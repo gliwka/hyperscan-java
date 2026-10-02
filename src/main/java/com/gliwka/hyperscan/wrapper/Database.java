@@ -19,6 +19,7 @@ import static java.util.function.Function.identity;
  */
 public class Database implements Closeable {
     private final Map<Integer, Expression> expressions;
+    private final Expression[] expressionsById;
     private final int expressionCount;
 
     private NativeDatabase database;
@@ -30,7 +31,14 @@ public class Database implements Closeable {
         }
     }
 
-    private Database(NativeDatabase database, List<Expression> expressions) {
+    private static final Map<Integer, ExpressionFlag> BITMASK_TO_FLAG =
+            Collections.unmodifiableMap(Arrays.stream(ExpressionFlag.values())
+                    .collect(Collectors.toMap(ExpressionFlag::getBits, identity())));
+
+    private final Mode mode;
+
+    private Database(NativeDatabase database, List<Expression> expressions, Mode mode) {
+        this.mode = mode;
         this.database = database;
         this.expressionCount = expressions.size();
         database.registerDeallocator();
@@ -49,6 +57,40 @@ public class Database implements Closeable {
                 this.expressions.put(i++, expression);
             }
         }
+
+        this.expressionsById = buildExpressionsById(expressions, hasIds);
+    }
+
+    private static Expression[] buildExpressionsById(List<Expression> expressions, boolean hasIds) {
+        int maxId = -1;
+        if (hasIds) {
+            for (Expression expression : expressions) {
+                Integer id = expression.getId();
+                if (id != null && id > maxId) {
+                    maxId = id;
+                }
+            }
+        } else {
+            maxId = expressions.size() - 1;
+        }
+        if (maxId < 0 || maxId > Math.max(4 * expressions.size(), 1024)) {
+            return null;
+        }
+        Expression[] byId = new Expression[maxId + 1];
+        if (hasIds) {
+            for (Expression expression : expressions) {
+                Integer id = expression.getId();
+                if (id != null) {
+                    byId[id] = expression;
+                }
+            }
+        } else {
+            int i = 0;
+            for (Expression expression : expressions) {
+                byId[i++] = expression;
+            }
+        }
+        return byId;
     }
 
     private static void handleErrors(int hsError, hs_compile_error_t compileError, List<Expression> expressions) throws CompileErrorException {
@@ -94,6 +136,21 @@ public class Database implements Closeable {
      * @throws CompileErrorException If any of the expressions cannot be compiled
      */
     public static Database compile(List<Expression> expressions) throws CompileErrorException {
+        return compile(expressions, Mode.BLOCK);
+    }
+
+    /**
+     * Compiles a list of expressions into a database in the given mode.
+     * Block-mode databases work with the block scanning methods, stream-mode
+     * databases with {@link Scanner#openStream(Database)}, and vectored-mode
+     * databases with the vectored scanning methods.
+     *
+     * @param expressions List of expressions to compile
+     * @param mode        Compilation mode
+     * @return Compiled database
+     * @throws CompileErrorException If any of the expressions cannot be compiled
+     */
+    public static Database compile(List<Expression> expressions, Mode mode) throws CompileErrorException {
         try (
                 NativeExpressionCollection nativeExpressions = new NativeExpressionCollection(expressions);
                 hs_compile_error_t errorT = new hs_compile_error_t();
@@ -106,15 +163,42 @@ public class Database implements Closeable {
                     nativeExpressions.getNativeFlags(),
                     nativeExpressions.getNativeIds(),
                     nativeExpressions.getSize(),
-                    HS_MODE_BLOCK,
+                    nativeMode(mode),
                     null,
                     database,
                     error);
 
             handleErrors(hsError, error.get(hs_compile_error_t.class), expressions);
 
-            return new Database(database.get(NativeDatabase.class), expressions);
+            return new Database(database.get(NativeDatabase.class), expressions, mode);
         }
+    }
+
+    /**
+     * compile an expression into a database in the given mode to use for scanning
+     *
+     * @param expression Expression to compile
+     * @param mode       Compilation mode
+     * @return Compiled database
+     * @throws CompileErrorException If the expression cannot be compiled
+     */
+    public static Database compile(Expression expression, Mode mode) throws CompileErrorException {
+        return compile(singletonList(expression), mode);
+    }
+
+    private static int nativeMode(Mode mode) {
+        switch (mode) {
+            case STREAM:
+                return HS_MODE_STREAM;
+            case VECTORED:
+                return HS_MODE_VECTORED;
+            default:
+                return HS_MODE_BLOCK;
+        }
+    }
+
+    Mode getMode() {
+        return mode;
     }
 
     NativeDatabase getDatabase() {
@@ -139,6 +223,13 @@ public class Database implements Closeable {
     }
 
     Expression getExpression(int id) {
+        Expression[] byId = expressionsById;
+        if (byId != null && id >= 0 && id < byId.length) {
+            Expression expression = byId[id];
+            if (expression != null) {
+                return expression;
+            }
+        }
         return expressions.get(id);
     }
 
@@ -249,10 +340,6 @@ public class Database implements Closeable {
         int expressionCount = expressionsDataIn.readInt();
         List<Expression> expressions = new ArrayList<>(expressionCount);
 
-        // Setup a lookup map for expression flags
-        Map<Integer, ExpressionFlag> bitmaskToFlag = Arrays.stream(ExpressionFlag.values())
-                .collect(Collectors.toMap(ExpressionFlag::getBits, identity()));
-
         for (int i = 0; i < expressionCount; i++) {
             int id = expressionsDataIn.readInt();
             String pattern = expressionsDataIn.readUTF();
@@ -260,7 +347,7 @@ public class Database implements Closeable {
             EnumSet<ExpressionFlag> flags = EnumSet.noneOf(ExpressionFlag.class);
             for (int j = 0; j < flagCount; j++) {
                 int bitmask = expressionsDataIn.readInt();
-                flags.add(bitmaskToFlag.get(bitmask));
+                flags.add(BITMASK_TO_FLAG.get(bitmask));
 
             }
             expressions.add(new Expression(pattern, flags, id == -1 ? null : id));
@@ -281,7 +368,9 @@ public class Database implements Closeable {
             throw HyperscanException.hsErrorToException(hsError);
         }
 
-        return new Database(database, expressions);
+        // The mode is not recoverable from the serialized form; leave it
+        // unknown so API-level mode validation is skipped for loaded databases.
+        return new Database(database, expressions, null);
     }
 
     @Override
