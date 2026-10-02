@@ -11,9 +11,10 @@ Vectorscan uses hybrid automata techniques to allow simultaneous matching of lar
 ### Key Features
 
 - **High Performance**: Scan text against thousands of patterns simultaneously with high performance
-- **Two Usage Modes**:
+- **Three Usage Modes**:
   - Direct Vectorscan API for maximum performance (with limited regex syntax support)
-  - `PatternFilter` utility for full Java Regex API compatibility
+  - `PatternFilter` utility for full Java Regex API compatibility (single-threaded)
+  - `ScopedPatternFilter` for thread-safe pre-filtering with a shared, compile-once database
 - **UTF-8 Support**: Proper handling of Unicode text with character-based matching results
 - **Cross-Platform**: Pre-compiled native libraries for Linux and macOS (x86_64 and arm64)
 - **Database Serialization**: Save and load compiled pattern databases to avoid recompilation costs
@@ -56,7 +57,24 @@ The library offers two primary ways to use the regex matching capabilities:
 
 It uses Vectorscan to quickly identify potential matches, then confirms them with Java's standard Regex engine.
 
-### 2. Direct Vectorscan API (For maximum performance)
+### 2. Using ScopedPatternFilter (Thread-safe pre-filtering)
+
+`ScopedPatternFilter` solves the same problem as `PatternFilter` but is designed for
+multi-threaded, long-lived services. `PatternFilter` is not thread-safe and compiles its own
+Vectorscan database per instance, so sharing it across threads means either recompiling the
+(expensive) database per thread or serializing access.
+
+A `ScopedPatternFilterFactory`:
+- Compiles the database **once** and shares it across all threads.
+- Hands each thread its own scanner via `get()`, so scanning is thread-safe with no contention.
+- Reclaims each thread's native resources automatically once the thread dies, and releases
+  everything when the factory is closed.
+- Is generic over `<T>`, so you can pre-filter arbitrary objects (not just `Pattern`) via a
+  mapping function.
+
+Create one factory at startup, share it, and call `get()` per scan. See the example below.
+
+### 3. Direct Vectorscan API (For maximum performance)
 
 Use the direct API when:
 - You need the absolute highest performance
@@ -110,6 +128,55 @@ public class PatternFilterExample {
     }
 }
 ```
+
+### Using ScopedPatternFilter (thread-safe)
+
+```java
+import com.gliwka.hyperscan.util.ScopedPatternFilter;
+import com.gliwka.hyperscan.util.ScopedPatternFilterFactory;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import static java.util.Arrays.asList;
+
+public class ScopedPatternFilterExample {
+    // Create the factory once and share it across the whole application.
+    private static final ScopedPatternFilterFactory<Pattern> FACTORY =
+        ScopedPatternFilterFactory.ofPatterns(asList(
+            Pattern.compile("The number is ([0-9]+)", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("The color is (blue|red|orange)"),
+            Pattern.compile("\\w+@\\w+\\.com")
+            // imagine thousands more patterns here
+        ));
+
+    // Called concurrently from many threads.
+    public void process(String text) {
+        // get() returns a thread-safe, non-closeable view backed by the shared database.
+        try (ScopedPatternFilter<Pattern> filter = FACTORY.get()) {
+            // Candidates = patterns Vectorscan matched + patterns it can't analyze.
+            List<Pattern> candidates = filter.filter(text);
+
+            // Confirm with Java's regex engine (build a fresh Matcher per use — Matchers
+            // are not thread-safe).
+            for (Pattern pattern : candidates) {
+                Matcher matcher = pattern.matcher(text);
+                while (matcher.find()) {
+                    System.out.println("Pattern: " + pattern + " matched: " + matcher.group(0));
+                }
+            }
+        }
+    }
+
+    // Release the shared native database on application shutdown.
+    public static void shutdown() {
+        FACTORY.close();
+    }
+}
+```
+
+You can also pre-filter arbitrary objects by supplying a mapping function with
+`ScopedPatternFilterFactory.create(items, item -> item.getPattern())`, and `filter()` will return
+the original objects whose patterns are candidates.
 
 ### Using Direct Vectorscan API
 
@@ -256,6 +323,7 @@ This is especially important when working with UTF-8 text where byte and Java ch
 - Create separate `Scanner` (scratch space) instances for each thread
 - `Database` instances are thread-safe for scanning
 - Always use try-with-resources or explicitly call `close()` on `Scanner` and `Database` instances
+- `PatternFilter` is **not** thread-safe — create one per thread, or use `ScopedPatternFilter` (see above) which shares a single compiled database across threads while giving each thread its own scanner
 
 ### Callback Handlers and Byte-Oriented Scanning
 
