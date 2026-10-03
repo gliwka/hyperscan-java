@@ -20,27 +20,27 @@ Vectorscan uses hybrid automata techniques to allow simultaneous matching of lar
 
 ## Installation
 
-The library is available on Maven Central. The version number consists of two parts (e.g., `5.4.11-3.1.0`):
-- First part: Vectorscan version (`5.4.11`)
-- Second part: Library version using semantic versioning (`3.1.0`)
+The library is available on Maven Central. The version number consists of two parts (e.g., `5.4.13-3.1.1`):
+- First part: Vectorscan version (`5.4.13`)
+- Second part: Library version using semantic versioning (`3.1.1`)
 
 ### Maven
 ```xml
 <dependency>
     <groupId>com.gliwka.hyperscan</groupId>
     <artifactId>hyperscan</artifactId>
-    <version>5.4.11-3.1.0</version>
+    <version>5.4.13-3.1.1</version>
 </dependency>
 ```
 
 ### Gradle
 ```gradle
-implementation 'com.gliwka.hyperscan:hyperscan:5.4.11-3.1.0'
+implementation 'com.gliwka.hyperscan:hyperscan:5.4.13-3.1.1'
 ```
 
 ### SBT
 ```sbt
-libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "5.4.11-3.1.0"
+libraryDependencies += "com.gliwka.hyperscan" %% "hyperscan" % "5.4.13-3.1.1"
 ```
 
 ## Usage Options

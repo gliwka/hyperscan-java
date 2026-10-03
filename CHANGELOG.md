@@ -1,4 +1,8 @@
 # Change Log
+## [5.4.13-3.1.1] 2026-10-03
+
+This release is a maintenance release updating vectorscan to the newest upstream release v5.4.13.
+
 ## [5.4.11-3.1.0] 2025-04-06
 
 ### Added
